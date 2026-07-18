@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "root_task_id": "af_g0_sanitized_authority_review",
+  "root_task": "Determine whether the sanitized v1 authority contract permits collision-equivalent authority identifiers and return only evidence that can be admitted deterministically.",
+  "repository_boundary": "../fixtures/sanitized-af-g0/repository",
+  "worker": {
+    "id": "r1_audience_reproduction",
+    "objective": "Independently test the v1 authority identifier rule against the supplied negative conformance vector. Identify the defect, its mechanism, and the required rejection behavior.",
+    "allowed_paths": [
+      "contract.json",
+      "negative-conformance-vectors.json"
+    ],
+    "evidence_requirements": [
+      "Show the authority identifier derivation rule.",
+      "Show the collision-equivalent negative conformance expectation.",
+      "Do not make claims without exact file-line evidence."
+    ]
+  },
+  "admission": {
+    "allowed_statuses": [
+      "FOUND"
+    ],
+    "allowed_finding_codes": [
+      "AUTHORITY_ALIASING"
+    ],
+    "required_output_terms": [
+      "authority-aliasing",
+      "collision-equivalent",
+      "derived solely"
+    ],
+    "forbidden_output_terms": [
+      "no conflict",
+      "no flaw"
+    ],
+    "minimum_evidence": 2
+  },
+  "delegation": {
+    "context_mode": "clean",
+    "fork_turns": "all",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "medium",
+    "max_depth": 1,
+    "max_concurrency": 1,
+    "max_cycles": 6,
+    "max_runtime_seconds": 600,
+    "max_output_bytes": 8192,
+    "max_incremental_tokens": 2000000,
+    "sandbox": "read-only"
+  }
+}

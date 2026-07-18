@@ -1,0 +1,43 @@
+{
+  "protocol": "agent-floor/native-smoke-summary/1",
+  "verified_at": "2026-07-18T17:31:57.128Z",
+  "codex_cli": "0.145.0-alpha.18",
+  "model": "gpt-5.6-terra",
+  "reasoning_effort": "medium",
+  "context_mode": "clean",
+  "inherited_turns": 0,
+  "fork_turns": "none",
+  "model_calls": 1,
+  "model_tool_cycles": 2,
+  "incremental_tokens": 19417,
+  "cached_input_tokens": 8960,
+  "fresh_input_tokens": 10140,
+  "output_tokens": 317,
+  "packet_sha256": "d8062e9fd691f3515b9dc9b44a0de97c984e4d0a7aef6e378d5c40726d2db017",
+  "admission": {
+    "result": "ADMITTED",
+    "finding_code": "AUTHORITY_ALIASING",
+    "target_recommendation": "REJECT",
+    "evidence": [
+      {
+        "reference": "contract.json:809",
+        "evidence_sha256": "300051dca27b9e60f6345a4a732cd015853520c33b976369f2fddd3c3d46ed39"
+      },
+      {
+        "reference": "negative-conformance-vectors.json:10",
+        "evidence_sha256": "819414c5d42f4ef1685c6d509fb30b0821e1702ad79ffa017bd6f0ae309477bb"
+      }
+    ]
+  },
+  "negative_control": {
+    "observed": "A prior native output cited both real lines but concluded no conflict.",
+    "corrected_gate_result": "REJECTED",
+    "enforced_by": [
+      "allowed_statuses",
+      "allowed_finding_codes",
+      "required_output_terms",
+      "forbidden_output_terms"
+    ],
+    "regression_fixture": "fixtures/sanitized-af-g0/results/r1-contradictory-output.json"
+  }
+}

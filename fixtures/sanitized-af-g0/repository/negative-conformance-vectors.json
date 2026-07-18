@@ -1,0 +1,13 @@
+{
+  "fixture": "sanitized-negative-conformance",
+  "vectors": [
+    {
+      "id": "authority-aliasing-001",
+      "left": "Alpha  Research",
+      "right": " alpha research ",
+      "relation": "normalize(left) == normalize(right)",
+      "condition": "distinct authorities share a display-derived identifier",
+      "expected": "REJECT_COLLISION_EQUIVALENT_IDENTIFIER"
+    }
+  ]
+}

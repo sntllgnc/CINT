@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "root_task_id": "af_g0_live_smoke",
+  "root_task": "Reproduce the known authority-aliasing defect from the two supplied authority-contract lines and return the smallest schema-valid evidence record.",
+  "repository_boundary": "../fixtures/sanitized-af-g0/repository",
+  "worker": {
+    "id": "live_authority_smoke",
+    "objective": "Show that the identifier is derived solely from a normalized display name while the collision-equivalent vector requires rejection. Treat the vector as a requirement, not as proof that v1 implements a collision check. Classify the result as AUTHORITY_ALIASING.",
+    "allowed_paths": [
+      "contract.json",
+      "negative-conformance-vectors.json"
+    ],
+    "evidence_requirements": [
+      "Cite contract.json line 809.",
+      "Cite negative-conformance-vectors.json line 10.",
+      "Return immediately after the schema-valid result."
+    ]
+  },
+  "admission": {
+    "allowed_statuses": [
+      "FOUND"
+    ],
+    "allowed_finding_codes": [
+      "AUTHORITY_ALIASING"
+    ],
+    "required_output_terms": [
+      "authority-aliasing",
+      "collision-equivalent",
+      "derived solely"
+    ],
+    "forbidden_output_terms": [
+      "no conflict",
+      "no flaw"
+    ],
+    "minimum_evidence": 2
+  },
+  "delegation": {
+    "context_mode": "clean",
+    "fork_turns": "none",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "medium",
+    "max_depth": 1,
+    "max_concurrency": 1,
+    "max_cycles": 3,
+    "max_runtime_seconds": 180,
+    "max_output_bytes": 4096,
+    "max_incremental_tokens": 50000,
+    "sandbox": "read-only"
+  }
+}

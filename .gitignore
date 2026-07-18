@@ -1,0 +1,6 @@
+artifacts/generated/
+artifacts/runs/
+artifacts/live*/
+node_modules/
+*.log
+.DS_Store

@@ -1,0 +1,21 @@
+{
+  "finding_code": "AUTHORITY_ALIASING",
+  "status": "FOUND",
+  "finding": "authority-aliasing flaw",
+  "summary": "The v1 identifier is derived only from a normalized display name, so distinct authorities with collision-equivalent display names can resolve to the same identifier. The negative conformance vector requires deterministic rejection of that condition.",
+  "evidence": [
+    {
+      "path": "contract.json",
+      "line": 809,
+      "excerpt": "\"authority_id\": \"digest:sha256(normalize(display_name))\"",
+      "claim": "The v1 authority identifier is derived solely from the normalized display name."
+    },
+    {
+      "path": "negative-conformance-vectors.json",
+      "line": 10,
+      "excerpt": "\"expected\": \"REJECT_COLLISION_EQUIVALENT_IDENTIFIER\"",
+      "claim": "Collision-equivalent identifiers are required to be rejected."
+    }
+  ],
+  "recommendation": "REJECT"
+}

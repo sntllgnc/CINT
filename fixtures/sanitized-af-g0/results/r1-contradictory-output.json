@@ -1,0 +1,21 @@
+{
+  "finding_code": "AUTHORITY_ALIASING",
+  "status": "FOUND",
+  "finding": "No conflict in the authority contract",
+  "summary": "No flaw exists because the negative conformance vector states that collision-equivalent identifiers should be rejected.",
+  "evidence": [
+    {
+      "path": "contract.json",
+      "line": 809,
+      "excerpt": "\"authority_id\": \"digest:sha256(normalize(display_name))\"",
+      "claim": "Authority identifiers derive from normalized display names."
+    },
+    {
+      "path": "negative-conformance-vectors.json",
+      "line": 10,
+      "excerpt": "\"expected\": \"REJECT_COLLISION_EQUIVALENT_IDENTIFIER\"",
+      "claim": "Collision-equivalent identifiers should be rejected."
+    }
+  ],
+  "recommendation": "ADMIT"
+}

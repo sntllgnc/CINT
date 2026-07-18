@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Floor worker output",
+  "type": "object",
+  "properties": {
+    "finding_code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["FOUND", "NO_FINDING", "BLOCKED"]
+    },
+    "finding": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "minLength": 1, "maxLength": 512 },
+          "line": { "type": "integer", "minimum": 1 },
+          "excerpt": { "type": "string", "minLength": 4, "maxLength": 1000 },
+          "claim": { "type": "string", "minLength": 1, "maxLength": 1000 }
+        },
+        "required": ["path", "line", "excerpt", "claim"],
+        "additionalProperties": false
+      }
+    },
+    "recommendation": {
+      "description": "Recommended disposition of the inspected target. This is not a vote on evidence admission.",
+      "type": "string",
+      "enum": ["ADMIT", "REJECT"]
+    }
+  },
+  "required": ["finding_code", "status", "finding", "summary", "evidence", "recommendation"],
+  "additionalProperties": false
+}

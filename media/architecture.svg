@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Agent Floor governed delegation architecture</title>
+  <desc id="desc">A root task passes through policy validation into a clean packet and read-only source projection. An ephemeral bounded Codex child returns request-local usage and schema-constrained evidence to a parent admission gate.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .zone { fill: none; stroke: #8c959f; stroke-width: 2; stroke-dasharray: 8 7; }
+      .node { fill: #f6f8fa; stroke: #57606a; stroke-width: 2; }
+      .control { fill: #ddf4ff; stroke: #0969da; }
+      .admit { fill: #dafbe1; stroke: #1a7f37; }
+      .reject { fill: #ffebe9; stroke: #cf222e; }
+      .line { fill: none; stroke: #57606a; stroke-width: 2.2; marker-end: url(#arrow); }
+      .text { fill: #24292f; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 18px; text-anchor: middle; }
+      .small { fill: #57606a; font-size: 14px; }
+      .zone-label { fill: #57606a; font-size: 15px; font-weight: 600; letter-spacing: 0.04em; }
+      @media (prefers-color-scheme: dark) {
+        .bg { fill: #0d1117; }
+        .node { fill: #161b22; stroke: #8c959f; }
+        .control { fill: #0c2d4a; stroke: #58a6ff; }
+        .admit { fill: #12261e; stroke: #3fb950; }
+        .reject { fill: #3d1519; stroke: #f85149; }
+        .text { fill: #f0f6fc; }
+        .small, .zone-label { fill: #b1bac4; }
+        .line, .zone { stroke: #8c959f; }
+      }
+    </style>
+  </defs>
+  <rect class="bg" width="1200" height="520" rx="16"/>
+  <rect class="zone" x="24" y="54" width="440" height="400" rx="18"/>
+  <text class="text zone-label" x="54" y="84" text-anchor="start">ROOT CONTROL PLANE</text>
+  <rect class="zone" x="486" y="54" width="330" height="400" rx="18"/>
+  <text class="text zone-label" x="516" y="84" text-anchor="start">BOUNDED CHILD PLANE</text>
+  <rect class="zone" x="838" y="54" width="338" height="400" rx="18"/>
+  <text class="text zone-label" x="868" y="84" text-anchor="start">PARENT ADMISSION PLANE</text>
+
+  <rect class="node" x="62" y="130" width="166" height="76" rx="12"/>
+  <text class="text" x="145" y="161">Root task</text>
+  <text class="text small" x="145" y="186">objective + authority</text>
+
+  <rect class="node control" x="268" y="130" width="164" height="76" rx="12"/>
+  <text class="text" x="350" y="161">Policy gate</text>
+  <text class="text small" x="350" y="186">reject full history</text>
+
+  <rect class="node" x="166" y="292" width="196" height="82" rx="12"/>
+  <text class="text" x="264" y="324">Clean packet</text>
+  <text class="text small" x="264" y="349">lineage + limits + hashes</text>
+
+  <rect class="node" x="520" y="130" width="260" height="82" rx="12"/>
+  <text class="text" x="650" y="162">Read-only projection</text>
+  <text class="text small" x="650" y="187">allowlisted files only</text>
+
+  <rect class="node control" x="520" y="292" width="260" height="82" rx="12"/>
+  <text class="text" x="650" y="324">Ephemeral Codex child</text>
+  <text class="text small" x="650" y="349">no resume · no fan-out</text>
+
+  <rect class="node" x="874" y="112" width="266" height="66" rx="12"/>
+  <text class="text" x="1007" y="140">Incremental auditor</text>
+  <text class="text small" x="1007" y="162">unique post-boundary usage</text>
+
+  <rect class="node" x="874" y="210" width="266" height="66" rx="12"/>
+  <text class="text" x="1007" y="238">Evidence verifier</text>
+  <text class="text small" x="1007" y="260">line + excerpt + source hash</text>
+
+  <rect class="node control" x="874" y="308" width="266" height="62" rx="12"/>
+  <text class="text" x="1007" y="334">Parent admission gate</text>
+  <text class="text small" x="1007" y="356">usage + evidence + semantics</text>
+
+  <rect class="node admit" x="868" y="392" width="126" height="44" rx="12"/>
+  <text class="text" x="931" y="420">ADMITTED</text>
+  <rect class="node reject" x="1014" y="392" width="126" height="44" rx="12"/>
+  <text class="text" x="1077" y="420">REJECTED</text>
+
+  <path class="line" d="M 228 168 L 268 168"/>
+  <path class="line" d="M 350 206 L 350 246 L 264 246 L 264 292"/>
+  <path class="line" d="M 362 333 L 442 333 L 442 171 L 520 171"/>
+  <path class="line" d="M 650 212 L 650 292"/>
+  <path class="line" d="M 780 316 L 834 316 L 834 145 L 874 145"/>
+  <path class="line" d="M 780 348 L 846 348 L 846 243 L 874 243"/>
+  <path class="line" d="M 1007 178 L 1007 194 L 1150 194 L 1150 339 L 1140 339"/>
+  <path class="line" d="M 1007 276 L 1007 308"/>
+  <path class="line" d="M 1007 370 L 1007 382 L 931 382 L 931 392"/>
+  <path class="line" d="M 1007 370 L 1007 382 L 1077 382 L 1077 392"/>
+</svg>

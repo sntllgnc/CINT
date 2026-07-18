@@ -1,0 +1,72 @@
+{
+  "gate": "AF-G0 — GOVERNED CHILD EXECUTION",
+  "verdict": "PASS",
+  "worker": "r1_audience_reproduction",
+  "context_mode": "clean",
+  "fork_turns": "none",
+  "model": "gpt-5.6-terra",
+  "reasoning_effort": "medium",
+  "model_calls": 16,
+  "incremental_tokens": 1492621,
+  "cached_input_tokens": 1380352,
+  "fresh_input_tokens": 103132,
+  "output_tokens": 9137,
+  "result": "ADMITTED",
+  "finding_code": "AUTHORITY_ALIASING",
+  "finding": "authority-aliasing flaw",
+  "evidence": [
+    "contract.json:809",
+    "negative-conformance-vectors.json:10"
+  ],
+  "lineage": {
+    "parent": "af_g0_sanitized_authority_review",
+    "child": "r1_audience_reproduction",
+    "depth": 1,
+    "context_mode": "clean",
+    "packet_sha256": "e5397ccb8cc4a2fae5d27024d5fd3aab25306c2473f54db3961d66690314c465"
+  },
+  "full_history_probe": {
+    "requested": "all",
+    "result": "REJECTED",
+    "code": "AF_CONTEXT_FULL_HISTORY_FORBIDDEN",
+    "message": "fork_turns=all is mechanically forbidden; use a clean self-contained packet"
+  },
+  "historical_regression": {
+    "source_context_mode": "full_history",
+    "source_fork_turns": "all",
+    "raw_cumulative_tokens": 555300000,
+    "raw_label": "555.3M",
+    "request_local_incremental_tokens": 1492621,
+    "incremental_label": "1.49M",
+    "naive_overstatement_tokens": 553807379,
+    "naive_overstatement_factor": 372.03,
+    "duplicate_usage_events_removed": 1,
+    "cumulative_delta_matches_incremental": true,
+    "inherited_baseline_note": "The sanitized inherited baseline is normalized to the reported 555.3M headline; all 16 request-local usage deltas preserve the measured case totals."
+  },
+  "semantic_negative_control": {
+    "result": "REJECTED",
+    "finding": "No conflict in the authority contract",
+    "real_evidence": [
+      "contract.json:809",
+      "negative-conformance-vectors.json:10"
+    ],
+    "rejection_codes": [
+      "AF_REQUIRED_TERM_MISSING",
+      "AF_REQUIRED_TERM_MISSING",
+      "AF_FORBIDDEN_TERM_PRESENT",
+      "AF_FORBIDDEN_TERM_PRESENT"
+    ]
+  },
+  "checks": {
+    "clean_child_packet": true,
+    "full_history_mechanically_rejected": true,
+    "bounded_execution": true,
+    "request_local_usage_verified": true,
+    "raw_replay_reproduced": true,
+    "evidence_deterministically_admitted": true,
+    "contradictory_claim_deterministically_rejected": true,
+    "private_repository_not_required": true
+  },
+  "judge_command": "npm run demo"
+}
