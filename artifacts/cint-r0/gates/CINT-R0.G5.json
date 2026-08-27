@@ -1,0 +1,27 @@
+{
+  "gate": "CINT-R0.G5",
+  "status": "PASS",
+  "synthetic_execution_tests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "prior_tests": {
+    "passed": 38,
+    "failed": 0
+  },
+  "proof": {
+    "bounded_patch": "SEALED",
+    "silent_request": "DENY",
+    "outside_authority": "DENY",
+    "missing_rollback": "DENY",
+    "changed_action": "REJECTED",
+    "stale_policy": "REVOKED",
+    "replay": "REPLAY_REJECTED",
+    "divergence": "ROLLED_BACK",
+    "interrupt": "ROLLED_BACK",
+    "unavailable": "FAIL_CLOSED",
+    "rollback_hash_restored": true
+  },
+  "external_mutations": 0,
+  "evidence": "docs/cint-r0/05_SYNTHETIC_ACTION_PROOF.md"
+}

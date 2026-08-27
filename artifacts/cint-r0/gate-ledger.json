@@ -34,6 +34,12 @@
       "name": "Receipt and atomic one-shot consumption",
       "status": "PASS",
       "evidence": "docs/cint-r0/04_DECISION_RECEIPTS.md"
+    },
+    {
+      "gate": "CINT-R0.G5",
+      "name": "Synthetic gated execution and rollback",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/05_SYNTHETIC_ACTION_PROOF.md"
     }
   ],
   "terminal_verdict": null

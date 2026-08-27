@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/seal-1.json",
+  "title": "CINT evidence seal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "id",
+    "issuer_id",
+    "status",
+    "outcome_status",
+    "receipt_id",
+    "receipt_digest",
+    "consumption_digest",
+    "revalidation_digest",
+    "outcome_digest",
+    "ledger_head_digest",
+    "issued_at",
+    "signature_algorithm",
+    "signature",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/evidence-seal/1" },
+    "id": { "$ref": "#/$defs/id" },
+    "issuer_id": { "$ref": "#/$defs/id" },
+    "status": { "const": "SEALED" },
+    "outcome_status": { "enum": ["VERIFIED", "ROLLED_BACK"] },
+    "receipt_id": { "$ref": "#/$defs/id" },
+    "receipt_digest": { "$ref": "#/$defs/sha256" },
+    "consumption_digest": { "$ref": "#/$defs/sha256" },
+    "revalidation_digest": { "$ref": "#/$defs/sha256" },
+    "outcome_digest": { "$ref": "#/$defs/sha256" },
+    "ledger_head_digest": { "$ref": "#/$defs/sha256" },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "signature_algorithm": { "const": "HMAC-SHA256" },
+    "signature": { "$ref": "#/$defs/sha256" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}
