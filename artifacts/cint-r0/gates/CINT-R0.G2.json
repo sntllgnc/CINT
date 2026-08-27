@@ -1,0 +1,16 @@
+{
+  "gate": "CINT-R0.G2",
+  "status": "PASS",
+  "legacy_tests": {
+    "passed": 14,
+    "failed": 0
+  },
+  "adapter_boundary_tests": {
+    "passed": 2,
+    "failed": 0
+  },
+  "historical_evidence_entries": 53,
+  "compatibility_shims": 5,
+  "adapter_authority": "NONE",
+  "evidence": "docs/cint-r0/02_LEGACY_EXTRACTION.md"
+}

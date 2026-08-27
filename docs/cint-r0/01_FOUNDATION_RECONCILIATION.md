@@ -77,4 +77,3 @@ decision boundary.
 6. Integrate the preserved Codex adapter only as a CINT action adapter.
 7. Replace the active documentation surface and run independent terminal
    verification.
-
