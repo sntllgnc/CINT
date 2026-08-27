@@ -7,6 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ignoredDirectories = new Set([".git", "node_modules"]);
 const ignoredPrefixes = ["artifacts/generated/"];
 const allowedDotfiles = new Set([".gitignore"]);
+const allowedHiddenDirectories = new Set([".github"]);
 const privateNames = ["S" + "I1", "Y" + "I1", "S" + "I6", "F" + "YRE"];
 const authorizedPublicNames = [new RegExp("\\b" + "SI1(?:[ -]CINT)" + "\\b", "gi")];
 const findings = [];
@@ -26,7 +27,9 @@ async function walk(directory) {
     }
     if (entry.isDirectory()) {
       if (ignoredDirectories.has(entry.name)) continue;
-      if (entry.name.startsWith(".")) findings.push({ code: "HIDDEN_DIRECTORY", path: relative });
+      if (entry.name.startsWith(".") && !allowedHiddenDirectories.has(relative)) {
+        findings.push({ code: "HIDDEN_DIRECTORY", path: relative });
+      }
       await walk(absolute);
       continue;
     }

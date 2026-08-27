@@ -1,5 +1,17 @@
 # Changelog
 
+## CINT-R0 — remote review gate
+
+- Published the architecture-accepted candidate as the public
+  `cint-r0-reassembly` review branch and draft pull request.
+- Added pinned, read-only GitHub Actions verification for Node.js 20, 24, and 26
+  on Linux, macOS, and Windows.
+- Added a mechanical 13-schema registry and package-surface check.
+- Corrected active terminology: public source exposure is yes; public default
+  product and public release remain no.
+- Preserved the ten architecture commits without squash, rebase, merge, release,
+  package publication, or repository rename.
+
 ## CINT-R0 — local review candidate
 
 - Reassembled the active product as SI1 CINT, Machine Counterintelligence

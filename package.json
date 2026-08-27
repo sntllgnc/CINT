@@ -20,6 +20,7 @@
     "demo": "node ./bin/agent-floor.js demo",
     "doctor": "node ./bin/agent-floor.js doctor",
     "test": "node --test ./tests/*.test.js",
+    "schema:verify": "node ./scripts/verify-cint-schema-package.mjs",
     "public:audit": "node ./scripts/publication-audit.mjs",
     "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs",
     "verify": "npm test && npm run demo && npm audit && npm run public:audit && npm run evidence:verify"

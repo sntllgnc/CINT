@@ -28,9 +28,22 @@ request
 
 ## R0 state
 
-`CINT-R0` is a local successor candidate. Publication, push, release, package
-publication, repository rename, and external announcement authority are all
-absent.
+`CINT-R0` is an architecture-accepted public review candidate on
+`cint-r0-reassembly`. Its source is publicly exposed through the review branch
+and draft pull request. The default branch remains the legacy Agent Floor
+product, and no merge, public release, package publication, repository rename,
+or external announcement is authorized.
+
+| Public state | Value |
+|---|---|
+| Source exposure | Yes — review branch and draft pull request |
+| Default product | No — `main` remains legacy Agent Floor |
+| Release | No |
+
+Remote review is enforced by a pinned GitHub Actions matrix covering the
+declared Node.js 20 compatibility boundary, Node.js 24 LTS, current Node.js 26,
+and Linux, macOS, and Windows. The stable aggregate gate is
+`CINT-R0 remote verification`.
 
 The R0 proof establishes:
 
