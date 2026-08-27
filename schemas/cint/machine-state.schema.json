@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/machine-state-1.json",
+  "title": "CINT machine state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol", "id", "epoch", "available", "observed_at", "state_digest", "digest"],
+  "properties": {
+    "protocol": { "const": "cint/machine-state/1" },
+    "id": { "$ref": "#/$defs/id" },
+    "epoch": { "type": "integer", "minimum": 1 },
+    "available": { "type": "boolean" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "state_digest": { "$ref": "#/$defs/sha256" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

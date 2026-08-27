@@ -6,11 +6,13 @@ import addFormats from "ajv-formats";
 const SCHEMA_DIRECTORY = new URL("../../schemas/cint/", import.meta.url);
 
 const SCHEMA_FILES = Object.freeze([
+  ["cint/adapter-capability/1", "adapter-capability.schema.json"],
   ["cint/authority/1", "authority.schema.json"],
   ["cint/challenge/1", "challenge.schema.json"],
   ["cint/decision/1", "decision.schema.json"],
   ["cint/execution-result/1", "execution-result.schema.json"],
   ["cint/intent/1", "intent.schema.json"],
+  ["cint/machine-state/1", "machine-state.schema.json"],
   ["cint/outcome/1", "outcome.schema.json"],
   ["cint/policy/1", "policy.schema.json"],
   ["cint/principal/1", "principal.schema.json"],

@@ -18,7 +18,7 @@ function eventId(type) {
 
 function availableExecutionRuntime(input) {
   try {
-    verifySealedRecord(input.adapter?.capability, "adapter capability");
+    verifyProtocolRecord(input.adapter?.capability, "cint/adapter-capability/1", "adapter capability");
   } catch {
     return false;
   }

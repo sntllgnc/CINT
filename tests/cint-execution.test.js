@@ -35,6 +35,12 @@ const T1 = "2026-08-27T00:01:00.000Z";
 const T2 = "2026-08-27T00:10:00.000Z";
 const EXPIRY = "2026-08-27T01:00:00.000Z";
 
+function rehashRecord(record, overrides) {
+  const { digest, ...unsigned } = record;
+  const changed = { ...unsigned, ...overrides };
+  return { ...changed, digest: canonicalDigest(changed) };
+}
+
 async function withRuntime(run) {
   const root = await mkdtemp(path.join(os.tmpdir(), "cint-execution-test-"));
   const target = path.join(root, "target.txt");
@@ -393,6 +399,65 @@ test("runtime adapter capability mismatch is rejected before preparation", async
   });
 });
 
+test("alien runtime adapter capability fails before receipt consumption", async () => {
+  await withRuntime(async (runtime) => {
+    const capability = rehashRecord(runtime.adapter.capability, {
+      protocol: "not-cint/adapter-capability/999",
+      forbidden_field: true
+    });
+    const adapter = {
+      id: runtime.adapter.id,
+      capability,
+      prepare: runtime.adapter.prepare.bind(runtime.adapter),
+      execute: runtime.adapter.execute.bind(runtime.adapter),
+      verify: runtime.adapter.verify.bind(runtime.adapter),
+      rollback: runtime.adapter.rollback.bind(runtime.adapter)
+    };
+    const result = await runtime.execute({ adapter });
+    assert.equal(result.status, "FAIL_CLOSED");
+    assert.equal(result.error_code, "CINT_UNAVAILABLE");
+    assert.equal(result.action_started, false);
+    assert.equal((await runtime.store.inspect(runtime.receipt.id)).state, "PENDING");
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("revalidation rejects alien adapter capability and machine state protocols", async () => {
+  await withRuntime(async (runtime) => {
+    for (const [field, protocol] of [
+      ["adapter_capability", "not-cint/adapter-capability/999"],
+      ["machine_state", "not-cint/machine-state/999"]
+    ]) {
+      const record = rehashRecord(runtime.snapshot[field], { protocol, forbidden_field: true });
+      const revalidation = revalidateReceipt({
+        receipt: runtime.receipt,
+        receipt_authority: runtime.receipt_authority,
+        ...runtime.snapshot,
+        [field]: record,
+        now: T1
+      });
+      assert.equal(revalidation.status, "REJECTED", field);
+      assert(revalidation.reason_codes.includes("CINT_PROTOCOL_INVALID"), field);
+    }
+  });
+});
+
+test("alien machine state fails execution admission before action", async () => {
+  await withRuntime(async (runtime) => {
+    const machine_state = rehashRecord(runtime.machine_state, {
+      protocol: "not-cint/machine-state/999",
+      forbidden_field: true
+    });
+    const result = await runtime.execute({
+      snapshot_provider: async () => ({ ...runtime.snapshot, machine_state })
+    });
+    assert.equal(result.status, "REJECTED");
+    assert.equal(result.action_started, false);
+    assert.equal((await runtime.store.inspect(runtime.receipt.id)).state, "REJECTED");
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
 test("policy drift introduced during preparation is revalidated before execution", async () => {
   await withRuntime(async (runtime) => {
     let activeSnapshot = runtime.snapshot;
@@ -464,7 +529,7 @@ test("authority revocation introduced during preparation is revalidated before e
   });
 });
 
-test("all eleven public protocol schemas execute on valid and invalid runtime records", async () => {
+test("all thirteen public protocol schemas execute on valid and invalid runtime records", async () => {
   await withRuntime(async (runtime) => {
     const challenge = runCounterIntentChallenge({ ...runtime.snapshot, now: T1 });
     const revalidation = revalidateReceipt({
@@ -475,11 +540,13 @@ test("all eleven public protocol schemas execute on valid and invalid runtime re
     });
     const result = await runtime.execute();
     const records = [
+      runtime.adapter.capability,
       runtime.authority,
       challenge,
       runtime.decision,
       result,
       runtime.snapshot.intent,
+      runtime.machine_state,
       result.outcome,
       runtime.policy,
       runtime.principal,
@@ -487,7 +554,7 @@ test("all eleven public protocol schemas execute on valid and invalid runtime re
       revalidation,
       result.evidence_seal
     ];
-    assert.equal(CINT_SCHEMA_PROTOCOLS.length, 11);
+    assert.equal(CINT_SCHEMA_PROTOCOLS.length, 13);
     assert.deepEqual(
       new Set(records.map((record) => record.protocol)),
       new Set(CINT_SCHEMA_PROTOCOLS)

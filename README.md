@@ -34,7 +34,7 @@ absent.
 
 The R0 proof establishes:
 
-- strict canonical objects and runtime enforcement of all 11 public JSON
+- strict canonical objects and runtime enforcement of all 13 public JSON
   schemas;
 - explicit principal, authority, policy, machine-state, and counter-intent
   contracts;

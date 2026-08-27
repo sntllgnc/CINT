@@ -14,7 +14,7 @@
 
 ## Local candidate contents
 
-- strict canonical contracts and runtime enforcement of all 11 public schemas;
+- strict canonical contracts and runtime enforcement of all 13 public schemas;
 - principal, authority, policy, challenge, and decision engine;
 - signed action-bound one-shot receipts;
 - atomic consumption, replay rejection, expiry, and revocation;

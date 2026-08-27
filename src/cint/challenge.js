@@ -5,8 +5,7 @@ import {
   isoInstant,
   sealRecord,
   stringArray,
-  verifyProtocolRecord,
-  verifySealedRecord
+  verifyProtocolRecord
 } from "./canonical.js";
 import { evaluateAuthority } from "./authority.js";
 import { evaluatePolicy } from "./policy.js";
@@ -74,8 +73,8 @@ export function runCounterIntentChallenge({
   verifyProtocolRecord(principal, "cint/principal/1", "principal");
   verifyProtocolRecord(authority, "cint/authority/1", "authority");
   verifyProtocolRecord(policy, "cint/policy/1", "policy");
-  verifySealedRecord(adapter_capability, "adapter capability");
-  verifySealedRecord(machine_state, "machine state");
+  verifyProtocolRecord(adapter_capability, "cint/adapter-capability/1", "adapter capability");
+  verifyProtocolRecord(machine_state, "cint/machine-state/1", "machine state");
   const checkedAt = isoInstant(now, "challenge time");
   const reasons = [];
   if (!machine_state.available) {

@@ -12,7 +12,7 @@ CINT-R0 enforces these properties for its implemented local adapters:
 - every receipt expires, revalidates, and reaches one terminal store state;
 - replay, substitution, forgery, stale policy, revoked authority, drift, and
   unavailable controls stop before action;
-- all 11 public authority-bearing schemas execute at record construction and
+- all 13 public authority-bearing schemas execute at record construction and
   verification boundaries;
 - missing adapter or seal verification fails before receipt consumption;
 - outcome verification is distinct from execution;
@@ -64,7 +64,7 @@ consumption, target drift, unavailable services, divergence, interrupt,
 rollback restoration, evidence sealing, adapter authority separation, and
 legacy packet drift. It also executes the independent-review regressions for a
 missing adapter verifier, preparation-time policy and authority drift, invalid
-rehashed authority, all 11 schemas, and denied eager Adapter 01 loading.
+rehashed authority, all 13 schemas, and denied eager Adapter 01 loading.
 
 The publication audit continues to reject local absolute paths, raw logs,
 credential formats, email addresses, session identifiers, hidden metadata, and

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/adapter-capability-1.json",
+  "title": "CINT adapter capability",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "id",
+    "action_types",
+    "consequence_classes",
+    "prepare_side_effect_free",
+    "rollback",
+    "interrupt",
+    "outcome_verification",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/adapter-capability/1" },
+    "id": { "$ref": "#/$defs/id" },
+    "action_types": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "consequence_classes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "enum": ["READ_ONLY", "CONSEQUENTIAL"] }
+    },
+    "prepare_side_effect_free": { "type": "boolean" },
+    "rollback": { "type": "boolean" },
+    "interrupt": { "type": "boolean" },
+    "outcome_verification": { "type": "boolean" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

@@ -1,4 +1,4 @@
-import { isoInstant, sealRecord, verifyProtocolRecord, verifySealedRecord } from "./canonical.js";
+import { isoInstant, sealRecord, verifyProtocolRecord } from "./canonical.js";
 import { runCounterIntentChallenge } from "./challenge.js";
 
 function unique(values) {
@@ -21,12 +21,11 @@ export function revalidateReceipt(input) {
     ["principal", input.principal, "cint/principal/1"],
     ["authority", input.authority, "cint/authority/1"],
     ["policy", input.policy, "cint/policy/1"],
-    ["adapter_capability", input.adapter_capability, null],
-    ["machine_state", input.machine_state, null]
+    ["adapter_capability", input.adapter_capability, "cint/adapter-capability/1"],
+    ["machine_state", input.machine_state, "cint/machine-state/1"]
   ]) {
     try {
-      if (protocol) verifyProtocolRecord(record, protocol, label);
-      else verifySealedRecord(record, label);
+      verifyProtocolRecord(record, protocol, label);
     } catch (error) {
       reasonCodes.push(error.code ?? "CINT_RECORD_INVALID");
     }

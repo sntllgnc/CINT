@@ -12,7 +12,7 @@ valid consumed receipt can reach an action adapter.
 
 | Component | Security role | Source evidence |
 |---|---|---|
-| Canonical records | Execute all 11 public schemas; reject unknown fields, wrong protocols, and tampered digests | `src/cint/schema.js`, `src/cint/canonical.js` |
+| Canonical records | Execute all 13 public schemas; reject unknown fields, wrong protocols, and tampered digests | `src/cint/schema.js`, `src/cint/canonical.js` |
 | Intent reconstruction | Bind request, action, target, context, effects, and uncertainty | `src/cint/intent.js:33-67` |
 | Authority and policy | Enforce exact grants, epochs, validity, allowed adapters, and rollback policy | `src/cint/authority.js:24-110`, `src/cint/policy.js:12-97` |
 | Counter-intent and decision | Deny silent or mismatched intent; route uncertainty; keep decisions non-executable | `src/cint/challenge.js:54-127`, `src/cint/decision.js:11-67` |

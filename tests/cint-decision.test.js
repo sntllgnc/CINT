@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  canonicalDigest,
   createAdapterCapability,
   createAuthorityGrant,
   createIntent,
@@ -112,6 +113,12 @@ function decideRecords(values, overrides = {}) {
   });
 }
 
+function rehashRecord(record, overrides) {
+  const { digest, ...unsigned } = record;
+  const changed = { ...unsigned, ...overrides };
+  return { ...changed, digest: canonicalDigest(changed) };
+}
+
 test("canonical parser admits only the canonical byte representation", () => {
   const value = { z: 1, a: [true, null] };
   assert.deepEqual(parseCanonicalJson(canonicalJson(value)), { a: [true, null], z: 1 });
@@ -205,6 +212,27 @@ test("rehashed authority with an alien protocol cannot reach ADMIT", () => {
     () => decideRecords({ ...current, authority: forged }, { id: "decision.schema-invalid-authority" }),
     (error) => error.code === "CINT_PROTOCOL_INVALID"
   );
+});
+
+test("adapter capability and machine state require exact protocols and fields", () => {
+  const current = records();
+  for (const [field, alienProtocol] of [
+    ["adapter_capability", "not-cint/adapter-capability/999"],
+    ["machine_state", "not-cint/machine-state/999"]
+  ]) {
+    const alien = rehashRecord(current[field], { protocol: alienProtocol, forbidden_field: true });
+    assert.throws(
+      () => decideRecords({ ...current, [field]: alien }, { id: `decision.alien.${field}` }),
+      (error) => error.code === "CINT_PROTOCOL_INVALID",
+      field
+    );
+    const extraField = rehashRecord(current[field], { forbidden_field: true });
+    assert.throws(
+      () => decideRecords({ ...current, [field]: extraField }, { id: `decision.extra.${field}` }),
+      (error) => error.code === "CINT_SCHEMA_INVALID",
+      field
+    );
+  }
 });
 
 test("decision cannot outlive its authority", () => {
