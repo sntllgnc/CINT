@@ -1,4 +1,4 @@
-# Independent Codex evaluation
+# Historical independent Codex evaluation
 
 After cloning the public release, give a fresh Codex task this bounded packet:
 

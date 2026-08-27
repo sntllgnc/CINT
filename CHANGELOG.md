@@ -1,5 +1,23 @@
 # Changelog
 
+## CINT-R0 — local review candidate
+
+- Reassembled the active product as SI1 CINT, Machine Counterintelligence
+  Runtime.
+- Added canonical intent, principal, authority, policy, challenge, decision,
+  machine-state, receipt, revalidation, outcome, rollback, ledger, and seal
+  protocols.
+- Added signed action-bound receipts with atomic one-shot consumption, replay
+  rejection, expiry, revocation, and fail-closed locks.
+- Added the disposable synthetic action proof with immediate revalidation,
+  exact outcome verification, interrupt, rollback, and hash restoration.
+- Isolated Agent Floor as CINT Adapter 01 while preserving historical APIs,
+  protocols, tests, fixtures, and evidence.
+- Archived competition and historical Agent Floor narrative outside the active
+  product documentation.
+- Kept the candidate local with no push, publication, release, package
+  publication, repository rename, or external announcement.
+
 ## v0.1.0-af-g0 — 2026-07-18
 
 - Added clean, self-contained child packets with explicit lineage and authority.

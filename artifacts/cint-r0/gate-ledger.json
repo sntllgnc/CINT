@@ -46,6 +46,12 @@
       "name": "Legacy Codex adapter admission",
       "status": "PASS",
       "evidence": "docs/cint-r0/06_CODEX_ADAPTER.md"
+    },
+    {
+      "gate": "CINT-R0.G7",
+      "name": "Documentation and technology reassembly",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/07_DOCUMENTATION_REASSEMBLY.md"
     }
   ],
   "terminal_verdict": null

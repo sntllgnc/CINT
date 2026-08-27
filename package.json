@@ -1,18 +1,22 @@
 {
-  "name": "agent-floor",
-  "version": "0.1.0",
-  "description": "Bounded Codex child execution with request-local usage and evidence admission.",
+  "name": "si1-cint",
+  "version": "0.1.0-cint-r0",
+  "description": "Machine Counterintelligence Runtime for decision-bound consequential action.",
   "type": "module",
   "private": true,
   "bin": {
+    "cint": "./bin/cint.js",
     "agent-floor": "./bin/agent-floor.js"
   },
   "scripts": {
+    "cint:identity": "node ./bin/cint.js identity",
+    "cint:test": "node --test ./tests/cint-*.test.js",
     "demo": "node ./bin/agent-floor.js demo",
     "doctor": "node ./bin/agent-floor.js doctor",
     "test": "node --test ./tests/*.test.js",
     "public:audit": "node ./scripts/publication-audit.mjs",
-    "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs"
+    "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs",
+    "verify": "npm test && npm run demo && npm audit && npm run public:audit && npm run evidence:verify"
   },
   "engines": {
     "node": ">=20"

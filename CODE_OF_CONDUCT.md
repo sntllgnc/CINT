@@ -1,6 +1,6 @@
 # Code of conduct
 
-Participation in Agent Floor must remain technically rigorous and professionally respectful.
+Participation in SI1 CINT must remain technically rigorous and professionally respectful.
 
 Contributors must:
 

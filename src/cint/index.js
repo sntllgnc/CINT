@@ -3,6 +3,7 @@ export * from "./adapters/synthetic-file-patch.js";
 export * from "./adapters/codex/index.js";
 export * from "./canonical.js";
 export * from "./challenge.js";
+export * from "./cli.js";
 export * from "./decision.js";
 export * from "./evidence.js";
 export * from "./execution.js";

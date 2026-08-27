@@ -1,4 +1,4 @@
-# Codex adoption
+# Historical Codex adoption
 
 This guide applies Agent Floor's controls to another Codex task without inheriting the development task that produced Agent Floor.
 

@@ -8,7 +8,7 @@ const ignoredDirectories = new Set([".git", "node_modules"]);
 const ignoredPrefixes = ["artifacts/generated/"];
 const allowedDotfiles = new Set([".gitignore"]);
 const privateNames = ["S" + "I1", "Y" + "I1", "S" + "I6", "F" + "YRE"];
-const authorizedPublicNames = [new RegExp("\\b" + "SI1 CINT" + "\\b", "gi")];
+const authorizedPublicNames = [new RegExp("\\b" + "SI1(?:[ -]CINT)" + "\\b", "gi")];
 const findings = [];
 const files = [];
 const excludedMetadata = [];
@@ -88,7 +88,7 @@ for (const file of files) {
 }
 
 const result = {
-  gate: "AF-PUBLICATION-AUDIT",
+  gate: "CINT-PUBLICATION-AUDIT",
   verdict: findings.length === 0 ? "PASS" : "FAIL",
   files_scanned: files.length,
   excluded_metadata_files: excludedMetadata.length,

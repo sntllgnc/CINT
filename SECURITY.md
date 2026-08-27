@@ -1,25 +1,41 @@
 # Security policy
 
-## Supported release
+## Supported line
 
-Security fixes are applied to the latest `0.1.x` release line.
+Security corrections for the local CINT-R0 candidate are developed on the
+successor branch. The immutable Agent Floor release remains historical evidence.
 
 ## Report a vulnerability
 
-Use GitHub's private vulnerability reporting feature for this repository. Include the affected version, control boundary, reproduction steps, impact, and the smallest sanitized evidence needed to verify the report.
+Use the repository's private vulnerability reporting channel. Include the
+affected revision, violated CINT invariant, realistic attacker starting
+capability, action or evidence boundary, reproduction steps, impact, and the
+smallest sanitized proof required to verify the report.
 
-Do not place secrets, credentials, private source material, raw Codex logs, or operator conversation history in a public issue. If private reporting is unavailable, open a minimal public issue requesting a private coordination channel without including vulnerability details.
+Do not place credentials, receipt or seal keys, private source, raw Codex logs,
+operator requests, local paths, or vulnerability-triggering payloads in a public
+issue. If private reporting is unavailable, request a private coordination
+channel without vulnerability details.
 
-## Data and credential boundary
+## Reportable boundaries
 
-Agent Floor executes locally. It does not require raw log upload, does not modify Codex credentials, and does not publish authentication material. The runner uses the already authenticated local Codex command surface when a user explicitly invokes a native run.
+- unauthorized decision or receipt issuance;
+- receipt forgery, replay, expiry, revocation, or atomic-consumption bypass;
+- action, target, context, principal, authority, policy, adapter, or
+  machine-state binding bypass;
+- fail-open execution when a required CINT component is unavailable;
+- synthetic containment, verification, interrupt, or rollback failure;
+- evidence-ledger or seal integrity bypass;
+- Codex Adapter 01 escape from its read-only source or zero-authority boundary;
+- disclosure of signing keys, credentials, private requests, or raw evidence.
 
-The public repository contains sanitized fixtures only. Native proof is reduced to aggregate usage, control state, evidence references, and content hashes.
+## Non-security accounting boundary
 
-## Billing and quota boundary
-
-Agent Floor reports request-local telemetry. Security reports and project documentation must not convert that telemetry into an unsupported billing total, subscription debit, or provider quota-causation claim.
+Legacy Adapter 01 telemetry is request-local execution evidence. It is not an
+account billing total, subscription debit, or provider quota-causation formula.
 
 ## Disclosure handling
 
-Reports will be acknowledged, reproduced against the smallest safe fixture, classified by affected boundary, and corrected with regression evidence. Coordinated disclosure should occur only after a fix or documented mitigation is available.
+Reports are reproduced against the smallest safe local fixture, classified by
+the affected trust boundary, corrected with negative and positive conformance
+evidence, and coordinated before any public disclosure.
