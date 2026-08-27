@@ -1,0 +1,18 @@
+{
+  "gate": "CINT-R0.G4",
+  "status": "PASS",
+  "receipt_tests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "prior_tests": {
+    "passed": 28,
+    "failed": 0
+  },
+  "receipt_authentication": "HMAC-SHA256",
+  "one_shot_store": "file-exclusive-lock-and-terminal-state",
+  "parallel_consumers_admitted": 1,
+  "ambiguous_lock": "FAIL_CLOSED",
+  "adapter_receipt_authority": "NONE",
+  "evidence": "docs/cint-r0/04_DECISION_RECEIPTS.md"
+}

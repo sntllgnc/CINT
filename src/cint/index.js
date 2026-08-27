@@ -6,4 +6,6 @@ export * from "./intent.js";
 export * from "./machine-state.js";
 export * from "./policy.js";
 export * from "./principal.js";
+export * from "./receipt.js";
 export * from "./state-machine.js";
+export * from "./store.js";

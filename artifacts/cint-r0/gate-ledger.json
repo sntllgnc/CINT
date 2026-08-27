@@ -28,6 +28,12 @@
       "name": "CINT contracts and decision engine",
       "status": "PASS",
       "evidence": "docs/cint-r0/03_DECISION_CONTRACTS.md"
+    },
+    {
+      "gate": "CINT-R0.G4",
+      "name": "Receipt and atomic one-shot consumption",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/04_DECISION_RECEIPTS.md"
     }
   ],
   "terminal_verdict": null
