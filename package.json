@@ -19,7 +19,7 @@
     "cint:test": "node --test ./tests/cint-*.test.js",
     "demo": "node ./bin/agent-floor.js demo",
     "doctor": "node ./bin/agent-floor.js doctor",
-    "test": "node --test ./tests/*.test.js",
+    "test": "node --test",
     "schema:verify": "node ./scripts/verify-cint-schema-package.mjs",
     "public:audit": "node ./scripts/publication-audit.mjs",
     "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs",
