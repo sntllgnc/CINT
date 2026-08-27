@@ -30,4 +30,3 @@ self-admit, bypass revalidation, or seal an outcome.
   entries from the historical Git object.
 
 No CINT decision or execution authority is introduced at this gate.
-

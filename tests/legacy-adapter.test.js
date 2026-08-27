@@ -27,4 +27,3 @@ test("Adapter 01 declares a zero-authority CINT boundary", () => {
     may_seal_outcome: false
   });
 });
-

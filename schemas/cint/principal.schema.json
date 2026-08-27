@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/principal-1.json",
+  "title": "CINT principal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol", "id", "type", "authenticated", "authority_chain", "attributes", "resolved_at", "digest"],
+  "properties": {
+    "protocol": { "const": "cint/principal/1" },
+    "id": { "$ref": "#/$defs/id" },
+    "type": { "enum": ["HUMAN", "SERVICE", "AGENT"] },
+    "authenticated": { "type": "boolean" },
+    "authority_chain": { "type": "array", "maxItems": 16, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+    "attributes": {},
+    "resolved_at": { "type": "string", "format": "date-time" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

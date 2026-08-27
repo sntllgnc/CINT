@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/challenge-1.json",
+  "title": "CINT counter-intent challenge",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "status",
+    "checked_at",
+    "intent_digest",
+    "principal_digest",
+    "authority_digest",
+    "policy_digest",
+    "adapter_capability_digest",
+    "machine_state_digest",
+    "reasons",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/challenge/1" },
+    "status": { "enum": ["CLEAR", "DENIED", "REVIEW"] },
+    "checked_at": { "type": "string", "format": "date-time" },
+    "intent_digest": { "$ref": "#/$defs/sha256" },
+    "principal_digest": { "$ref": "#/$defs/sha256" },
+    "authority_digest": { "$ref": "#/$defs/sha256" },
+    "policy_digest": { "$ref": "#/$defs/sha256" },
+    "adapter_capability_digest": { "$ref": "#/$defs/sha256" },
+    "machine_state_digest": { "$ref": "#/$defs/sha256" },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "disposition", "message"],
+        "properties": {
+          "code": { "$ref": "#/$defs/id" },
+          "disposition": { "enum": ["DENY", "REVIEW"] },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

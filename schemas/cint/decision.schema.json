@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/decision-1.json",
+  "title": "CINT decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "id",
+    "status",
+    "issued_at",
+    "expires_at",
+    "binding",
+    "binding_digest",
+    "challenge_digest",
+    "reason_codes",
+    "receipt_eligible",
+    "execution_authority",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/decision/1" },
+    "id": { "$ref": "#/$defs/id" },
+    "status": { "enum": ["ADMIT", "DENY", "REVIEW"] },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intent_digest",
+        "action_digest",
+        "target_digest",
+        "context_digest",
+        "principal_digest",
+        "authority_id",
+        "authority_digest",
+        "authority_epoch",
+        "policy_id",
+        "policy_digest",
+        "policy_epoch",
+        "adapter_id",
+        "adapter_capability_digest",
+        "machine_state_id",
+        "machine_state_epoch",
+        "machine_state_digest"
+      ],
+      "properties": {
+        "intent_digest": { "$ref": "#/$defs/sha256" },
+        "action_digest": { "$ref": "#/$defs/sha256" },
+        "target_digest": { "$ref": "#/$defs/sha256" },
+        "context_digest": { "$ref": "#/$defs/sha256" },
+        "principal_digest": { "$ref": "#/$defs/sha256" },
+        "authority_id": { "$ref": "#/$defs/id" },
+        "authority_digest": { "$ref": "#/$defs/sha256" },
+        "authority_epoch": { "type": "integer", "minimum": 1 },
+        "policy_id": { "$ref": "#/$defs/id" },
+        "policy_digest": { "$ref": "#/$defs/sha256" },
+        "policy_epoch": { "type": "integer", "minimum": 1 },
+        "adapter_id": { "$ref": "#/$defs/id" },
+        "adapter_capability_digest": { "$ref": "#/$defs/sha256" },
+        "machine_state_id": { "$ref": "#/$defs/id" },
+        "machine_state_epoch": { "type": "integer", "minimum": 1 },
+        "machine_state_digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "binding_digest": { "$ref": "#/$defs/sha256" },
+    "challenge_digest": { "$ref": "#/$defs/sha256" },
+    "reason_codes": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+    "receipt_eligible": { "type": "boolean" },
+    "execution_authority": { "const": "NONE" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

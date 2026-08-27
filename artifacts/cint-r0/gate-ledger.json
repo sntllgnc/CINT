@@ -22,6 +22,12 @@
       "name": "Module extraction with behavioral equivalence",
       "status": "PASS",
       "evidence": "docs/cint-r0/02_LEGACY_EXTRACTION.md"
+    },
+    {
+      "gate": "CINT-R0.G3",
+      "name": "CINT contracts and decision engine",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/03_DECISION_CONTRACTS.md"
     }
   ],
   "terminal_verdict": null
