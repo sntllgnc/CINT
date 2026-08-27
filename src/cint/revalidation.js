@@ -8,12 +8,19 @@ function unique(values) {
 export function revalidateReceipt(input) {
   const checkedAt = isoInstant(input.now, "revalidation time");
   const reasonCodes = [];
-  let signatureValid = false;
+  let receiptAuthenticated = false;
   try {
-    input.receipt_authority.verify(input.receipt, { now: checkedAt });
-    signatureValid = true;
+    input.receipt_authority.verify(input.receipt);
+    receiptAuthenticated = true;
   } catch (error) {
     reasonCodes.push(error.code ?? "CINT_RECEIPT_INVALID");
+  }
+  if (receiptAuthenticated) {
+    try {
+      input.receipt_authority.verify(input.receipt, { now: checkedAt });
+    } catch (error) {
+      reasonCodes.push(error.code ?? "CINT_RECEIPT_INVALID");
+    }
   }
 
   for (const [label, record, protocol] of [
@@ -68,7 +75,7 @@ export function revalidateReceipt(input) {
   }
   if (input.machine_state?.available !== true) reasonCodes.push("CINT_UNAVAILABLE");
 
-  if (signatureValid && reasonCodes.length === 0) {
+  if (receiptAuthenticated && reasonCodes.every((code) => code === "CINT_RECEIPT_EXPIRED")) {
     try {
       const challenge = runCounterIntentChallenge({
         intent: input.intent,

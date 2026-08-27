@@ -32,8 +32,37 @@ import { sha256 } from "../src/util.js";
 
 const T0 = "2026-08-27T00:00:00.000Z";
 const T1 = "2026-08-27T00:01:00.000Z";
+const T2_BEFORE = "2026-08-27T00:09:59.999Z";
 const T2 = "2026-08-27T00:10:00.000Z";
 const EXPIRY = "2026-08-27T01:00:00.000Z";
+
+function createTestClock(initial = T1) {
+  let current = initial;
+  return Object.freeze({
+    now: () => current,
+    set: (next) => {
+      current = next;
+    }
+  });
+}
+
+function adapterAdvancingClock(runtime, next, counters = { execute_calls: 0 }) {
+  return {
+    id: runtime.adapter.id,
+    capability: runtime.adapter.capability,
+    prepare: async (...args) => {
+      const prepared = await runtime.adapter.prepare(...args);
+      runtime.clock.set(next);
+      return prepared;
+    },
+    execute: async (...args) => {
+      counters.execute_calls += 1;
+      return runtime.adapter.execute(...args);
+    },
+    verify: runtime.adapter.verify.bind(runtime.adapter),
+    rollback: runtime.adapter.rollback.bind(runtime.adapter)
+  };
+}
 
 function rehashRecord(record, overrides) {
   const { digest, ...unsigned } = record;
@@ -149,6 +178,7 @@ async function withRuntime(run) {
     key: Buffer.alloc(32, 19)
   });
   const ledger = new ExecutionLedger(path.join(root, "evidence", "execution.jsonl"));
+  const clock = createTestClock();
 
   const runtime = {
     root,
@@ -170,12 +200,14 @@ async function withRuntime(run) {
     store,
     seal_authority,
     ledger,
+    clock,
     execute: (overrides = {}) =>
       executeWithReceipt({
         receipt,
         receipt_authority,
         store,
         snapshot_provider: async () => snapshot,
+        clock,
         adapter,
         seal_authority,
         ledger,
@@ -367,6 +399,17 @@ test("missing adapter verifier fails closed before receipt consumption", async (
   });
 });
 
+test("missing trusted clock fails closed before receipt consumption", async () => {
+  await withRuntime(async (runtime) => {
+    const result = await runtime.execute({ clock: null });
+    assert.equal(result.status, "FAIL_CLOSED");
+    assert.equal(result.error_code, "CINT_UNAVAILABLE");
+    assert.equal(result.action_started, false);
+    assert.equal((await runtime.store.inspect(runtime.receipt.id)).state, "PENDING");
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
 test("runtime adapter capability mismatch is rejected before preparation", async () => {
   await withRuntime(async (runtime) => {
     let prepareCalls = 0;
@@ -523,6 +566,119 @@ test("authority revocation introduced during preparation is revalidated before e
     };
     const result = await runtime.execute({ adapter, snapshot_provider: async () => activeSnapshot });
     assert.equal(result.status, "REVOKED");
+    assert.equal(result.action_started, false);
+    assert.equal(executeCalls, 0);
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("receipt expiry crossed during preparation prevents every action", async () => {
+  await withRuntime(async (runtime) => {
+    const counters = { execute_calls: 0 };
+    const result = await runtime.execute({
+      adapter: adapterAdvancingClock(runtime, T2, counters)
+    });
+    assert.equal(result.status, "REVOKED");
+    assert.equal(result.error_code, "CINT_RECEIPT_EXPIRED");
+    assert.equal(result.completed_at, T2);
+    assert.match(result.revalidation_digest, /^[a-f0-9]{64}$/);
+    assert.equal(result.action_started, false);
+    assert.equal(counters.execute_calls, 0);
+    assert.equal((await runtime.store.inspect(runtime.receipt.id)).state, "CONSUMED");
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("authority expiry crossed during preparation is evaluated at the final trusted time", async () => {
+  await withRuntime(async (runtime) => {
+    const counters = { execute_calls: 0 };
+    const finalRevalidation = revalidateReceipt({
+      receipt: runtime.receipt,
+      receipt_authority: runtime.receipt_authority,
+      ...runtime.snapshot,
+      now: EXPIRY
+    });
+    assert(finalRevalidation.reason_codes.includes("CINT_RECEIPT_EXPIRED"));
+    assert(finalRevalidation.reason_codes.includes("CINT_AUTHORITY_EXPIRED"));
+    const result = await runtime.execute({
+      adapter: adapterAdvancingClock(runtime, EXPIRY, counters)
+    });
+    assert.equal(result.status, "REVOKED");
+    assert.equal(result.action_started, false);
+    assert.equal(counters.execute_calls, 0);
+    assert(result.error_code === "CINT_RECEIPT_EXPIRED" || result.error_code === "CINT_AUTHORITY_EXPIRED");
+    assert.equal(result.revalidation_digest, finalRevalidation.digest);
+    assert.equal(result.completed_at, EXPIRY);
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("receipt lifetime is valid one millisecond before expiry and revoked at the exact boundary", async () => {
+  await withRuntime(async (runtime) => {
+    const result = await runtime.execute({
+      adapter: adapterAdvancingClock(runtime, T2_BEFORE)
+    });
+    assert.equal(result.status, "SEALED");
+    assert.equal(result.action_started, true);
+    assert.equal(result.completed_at, T2_BEFORE);
+    assert.equal(await readFile(runtime.target, "utf8"), "after\n");
+  });
+  await withRuntime(async (runtime) => {
+    const counters = { execute_calls: 0 };
+    const result = await runtime.execute({
+      adapter: adapterAdvancingClock(runtime, T2, counters)
+    });
+    assert.equal(result.status, "REVOKED");
+    assert.equal(result.action_started, false);
+    assert.equal(counters.execute_calls, 0);
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("stale caller time cannot override an expired final trusted time", async () => {
+  await withRuntime(async (runtime) => {
+    runtime.clock.set(T2);
+    let executeCalls = 0;
+    const adapter = {
+      id: runtime.adapter.id,
+      capability: runtime.adapter.capability,
+      prepare: runtime.adapter.prepare.bind(runtime.adapter),
+      execute: async (...args) => {
+        executeCalls += 1;
+        return runtime.adapter.execute(...args);
+      },
+      verify: runtime.adapter.verify.bind(runtime.adapter),
+      rollback: runtime.adapter.rollback.bind(runtime.adapter)
+    };
+    const result = await runtime.execute({ adapter, at: T1 });
+    assert.equal(result.status, "REVOKED");
+    assert.equal(result.error_code, "CINT_RECEIPT_EXPIRED");
+    assert.equal(result.action_started, false);
+    assert.equal(executeCalls, 0);
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("trusted clock failure after preparation fails closed without action", async () => {
+  await withRuntime(async (runtime) => {
+    let executeCalls = 0;
+    const adapter = {
+      id: runtime.adapter.id,
+      capability: runtime.adapter.capability,
+      prepare: runtime.adapter.prepare.bind(runtime.adapter),
+      execute: async (...args) => {
+        executeCalls += 1;
+        return runtime.adapter.execute(...args);
+      },
+      verify: runtime.adapter.verify.bind(runtime.adapter),
+      rollback: runtime.adapter.rollback.bind(runtime.adapter)
+    };
+    const result = await runtime.execute({
+      adapter,
+      clock: { now: () => { throw new Error("clock unavailable"); } }
+    });
+    assert.equal(result.status, "FAIL_CLOSED");
+    assert.equal(result.error_code, "CINT_FAIL_CLOSED");
     assert.equal(result.action_started, false);
     assert.equal(executeCalls, 0);
     assert.equal(await readFile(runtime.target, "utf8"), "before\n");

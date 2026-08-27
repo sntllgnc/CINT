@@ -167,6 +167,7 @@ test("legacy bounded review runs only under a consumed CINT receipt", async () =
       receipt_authority: runtime.receipt_authority,
       store: runtime.store,
       snapshot_provider: async () => runtime.snapshot,
+      clock: { now: () => T1 },
       adapter: runtime.adapter,
       seal_authority: runtime.seal_authority,
       ledger: runtime.ledger,

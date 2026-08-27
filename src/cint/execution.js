@@ -16,6 +16,10 @@ function eventId(type) {
   return `event.${type.toLowerCase()}.${randomUUID()}`;
 }
 
+function trustedExecutionTime(clock) {
+  return isoInstant(clock.now(), "trusted execution time");
+}
+
 function availableExecutionRuntime(input) {
   try {
     verifyProtocolRecord(input.adapter?.capability, "cint/adapter-capability/1", "adapter capability");
@@ -25,6 +29,7 @@ function availableExecutionRuntime(input) {
   const capability = input.adapter.capability;
   return (
     typeof input.snapshot_provider === "function" &&
+    input.clock?.now instanceof Function &&
     input.receipt_authority?.verify instanceof Function &&
     input.store?.consume instanceof Function &&
     typeof input.adapter?.id === "string" &&
@@ -74,10 +79,11 @@ async function sealedResult({
   revalidation,
   outcome,
   status,
+  at,
   errorCode = null,
   actionStarted = true
 }) {
-  const outcomeEvent = await record(input.ledger, `OUTCOME_${outcome.status}`, input.at, {
+  const outcomeEvent = await record(input.ledger, `OUTCOME_${outcome.status}`, at, {
     receipt_digest: input.receipt.digest,
     outcome_digest: outcome.digest
   });
@@ -87,7 +93,7 @@ async function sealedResult({
     revalidation,
     outcome,
     ledger_head: outcomeEvent,
-    issued_at: input.at
+    issued_at: at
   });
   input.seal_authority.verify(seal);
   return sealRecord({
@@ -101,7 +107,7 @@ async function sealedResult({
     outcome,
     evidence_seal: seal,
     error_code: errorCode,
-    completed_at: input.at
+    completed_at: at
   });
 }
 
@@ -113,6 +119,7 @@ export async function executeWithReceipt(input) {
       "receipt_authority",
       "store",
       "snapshot_provider",
+      "clock",
       "adapter",
       "seal_authority",
       "ledger",
@@ -224,6 +231,7 @@ export async function executeWithReceipt(input) {
   let prepared = null;
   let execution = null;
   let actionStarted = false;
+  let executionAt = at;
   try {
     prepared = await input.adapter.prepare(currentSnapshot.intent, { at, signal: input.signal });
     await record(input.ledger, "EXECUTION_PREPARED", at, {
@@ -233,18 +241,19 @@ export async function executeWithReceipt(input) {
     });
 
     currentSnapshot = await input.snapshot_provider();
+    executionAt = trustedExecutionTime(input.clock);
     revalidation = revalidateReceipt({
       receipt: input.receipt,
       receipt_authority: input.receipt_authority,
       ...currentSnapshot,
-      now: at
+      now: executionAt
     });
     if (revalidation.status !== "VALID") {
       return failureResult({
         receipt: input.receipt,
         status: statusForError(null, revalidation),
         code: revalidation.reason_codes[0] ?? "CINT_REVALIDATION_FAILED",
-        at,
+        at: executionAt,
         consumption,
         revalidation,
         actionStarted: false
@@ -257,14 +266,14 @@ export async function executeWithReceipt(input) {
       "Runtime adapter does not match the execution-bound capability"
     );
     actionStarted = true;
-    execution = await input.adapter.execute(prepared, { at, signal: input.signal });
+    execution = await input.adapter.execute(prepared, { at: executionAt, signal: input.signal });
     verifySealedRecord(execution, "adapter execution");
-    await record(input.ledger, "EXECUTION_COMPLETED", at, {
+    await record(input.ledger, "EXECUTION_COMPLETED", executionAt, {
       receipt_digest: input.receipt.digest,
       execution_digest: execution.digest,
       revalidation_digest: revalidation.digest
     });
-    const verification = await input.adapter.verify(prepared, execution, { at, signal: input.signal });
+    const verification = await input.adapter.verify(prepared, execution, { at: executionAt, signal: input.signal });
     verifySealedRecord(verification, "outcome verification");
     if (verification.status === "VERIFIED") {
       const outcome = createOutcome({
@@ -272,31 +281,31 @@ export async function executeWithReceipt(input) {
         execution,
         verification,
         rollback: null,
-        completed_at: at
+        completed_at: executionAt
       });
-      return await sealedResult({ input, consumption, revalidation, outcome, status: "SEALED" });
+      return await sealedResult({ input, consumption, revalidation, outcome, status: "SEALED", at: executionAt });
     }
-    const rollback = await performRollback(input.adapter, prepared, { at, signal: input.signal });
+    const rollback = await performRollback(input.adapter, prepared, { at: executionAt, signal: input.signal });
     assertCint(rollback.status === "RESTORED", "CINT_ROLLBACK_FAILED", "Divergent outcome could not be restored");
     const outcome = createOutcome({
       receipt: input.receipt,
       execution,
       verification,
       rollback,
-      completed_at: at
+      completed_at: executionAt
     });
-    return await sealedResult({ input, consumption, revalidation, outcome, status: "ROLLED_BACK" });
+    return await sealedResult({ input, consumption, revalidation, outcome, status: "ROLLED_BACK", at: executionAt });
   } catch (error) {
     if (prepared && actionStarted) {
       const interruptedExecution = execution ?? sealRecord({
         protocol: "cint/execution-interruption/1",
         status: "INTERRUPTED",
         error_code: error.code ?? "CINT_EXECUTION_FAILED",
-        interrupted_at: at
+        interrupted_at: executionAt
       });
       let verification;
       try {
-        verification = await input.adapter.verify(prepared, interruptedExecution, { at, signal: input.signal });
+        verification = await input.adapter.verify(prepared, interruptedExecution, { at: executionAt, signal: input.signal });
         verifySealedRecord(verification, "outcome verification");
       } catch {
         verification = sealRecord({
@@ -305,17 +314,17 @@ export async function executeWithReceipt(input) {
           target: "unknown",
           expected_sha256: prepared.after_sha256 ?? "0".repeat(64),
           actual_sha256: "0".repeat(64),
-          checked_at: at
+          checked_at: executionAt
         });
       }
-      const rollback = await performRollback(input.adapter, prepared, { at, signal: input.signal });
+      const rollback = await performRollback(input.adapter, prepared, { at: executionAt, signal: input.signal });
       if (rollback.status === "RESTORED") {
         const outcome = createOutcome({
           receipt: input.receipt,
           execution: interruptedExecution,
           verification,
           rollback,
-          completed_at: at
+          completed_at: executionAt
         });
         try {
           return await sealedResult({
@@ -324,6 +333,7 @@ export async function executeWithReceipt(input) {
             revalidation,
             outcome,
             status: "ROLLED_BACK",
+            at: executionAt,
             errorCode: error.code ?? "CINT_EXECUTION_FAILED"
           });
         } catch (sealError) {
@@ -331,7 +341,7 @@ export async function executeWithReceipt(input) {
             receipt: input.receipt,
             status: "FAIL_CLOSED",
             code: sealError.code ?? "CINT_SEAL_FAILED",
-            at,
+            at: executionAt,
             consumption,
             revalidation,
             actionStarted
@@ -343,7 +353,7 @@ export async function executeWithReceipt(input) {
       receipt: input.receipt,
       status: "FAIL_CLOSED",
       code: error.code ?? "CINT_FAIL_CLOSED",
-      at,
+      at: executionAt,
       consumption,
       revalidation,
       actionStarted
