@@ -1,5 +1,6 @@
 export * from "./authority.js";
 export * from "./adapters/synthetic-file-patch.js";
+export * from "./adapters/codex/index.js";
 export * from "./canonical.js";
 export * from "./challenge.js";
 export * from "./decision.js";

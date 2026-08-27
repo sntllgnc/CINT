@@ -40,6 +40,12 @@
       "name": "Synthetic gated execution and rollback",
       "status": "PASS",
       "evidence": "docs/cint-r0/05_SYNTHETIC_ACTION_PROOF.md"
+    },
+    {
+      "gate": "CINT-R0.G6",
+      "name": "Legacy Codex adapter admission",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/06_CODEX_ADAPTER.md"
     }
   ],
   "terminal_verdict": null
