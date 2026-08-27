@@ -7,7 +7,9 @@ import test from "node:test";
 
 const executeFile = promisify(execFile);
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const LOADER = path.join(PROJECT_ROOT, "tests", "fixtures", "deny-cint-adapter-loader.mjs");
+const LOADER = pathToFileURL(
+  path.join(PROJECT_ROOT, "tests", "fixtures", "deny-cint-adapter-loader.mjs")
+).href;
 
 async function runDeniedImportProbe(arguments_) {
   return executeFile(process.execPath, ["--no-warnings", "--experimental-loader", LOADER, ...arguments_], {

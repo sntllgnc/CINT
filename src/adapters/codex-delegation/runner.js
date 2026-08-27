@@ -179,6 +179,13 @@ export async function resolveCodexBinary(override = undefined) {
   }
 }
 
+function normalizeCodexArgs(args = []) {
+  if (!Array.isArray(args) || args.some((value) => typeof value !== "string" || value.length === 0)) {
+    throw new AgentFloorError("AF_CODEX_ARGS_INVALID", "Codex argument prefix must contain non-empty strings");
+  }
+  return [...args];
+}
+
 export function buildChildProcessEnv(source = process.env) {
   const requested = String(source.AGENT_FLOOR_CODEX_ENV_ALLOWLIST ?? "")
     .split(",")
@@ -373,7 +380,12 @@ async function executeCodex({ command, args, cwd, prompt, guard, timeoutSeconds 
   });
 }
 
-export async function runGovernedChild({ spec, outputDir, codexBinary = undefined }) {
+export async function runGovernedChild({
+  spec,
+  outputDir,
+  codexBinary = undefined,
+  codexArgs = []
+}) {
   const out = path.resolve(outputDir);
   await mkdir(out, { recursive: true });
   const packetRecord = await createChildPacket(spec);
@@ -384,11 +396,14 @@ export async function runGovernedChild({ spec, outputDir, codexBinary = undefine
   await createSourceProjection(spec, projectionPath);
   await writeFile(instructionsPath, `${renderWorkerInstructions()}\n`, "utf8");
   const command = await resolveCodexBinary(codexBinary);
-  const args = buildCodexArgs(spec, {
-    instructions: instructionsPath,
-    output: outputPath,
-    workspace: projectionPath
-  });
+  const args = [
+    ...normalizeCodexArgs(codexArgs),
+    ...buildCodexArgs(spec, {
+      instructions: instructionsPath,
+      output: outputPath,
+      workspace: projectionPath
+    })
+  ];
   const guard = new ExecutionGuard(spec.delegation);
   const slot = await acquireConcurrencySlot(spec);
   const startedAt = new Date().toISOString();
@@ -502,11 +517,12 @@ export async function runGovernedChild({ spec, outputDir, codexBinary = undefine
   }
 }
 
-export async function inspectCodexSurface(codexBinary = undefined) {
+export async function inspectCodexSurface(codexBinary = undefined, codexArgs = []) {
   const command = await resolveCodexBinary(codexBinary);
+  const prefixArgs = normalizeCodexArgs(codexArgs);
   const run = (args) =>
     new Promise((resolve) => {
-      const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
+      const child = spawn(command, [...prefixArgs, ...args], { stdio: ["ignore", "pipe", "pipe"] });
       let stdout = "";
       let stderr = "";
       child.stdout.setEncoding("utf8");

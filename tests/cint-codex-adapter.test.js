@@ -83,7 +83,12 @@ async function withAdapterRuntime(run) {
     review_on_uncertainty: true,
     issued_at: T0
   });
-  const adapter = new CodexDelegationCintAdapter({ spec, output_dir: output, codex_binary: mock });
+  const adapter = new CodexDelegationCintAdapter({
+    spec,
+    output_dir: output,
+    codex_binary: process.execPath,
+    codex_args: [mock]
+  });
   const machine_state = createMachineStateSnapshot({
     id: "machine.codex-adapter",
     epoch: 1,

@@ -49,11 +49,18 @@ export async function createCodexDelegationAction(spec) {
 
 export class CodexDelegationCintAdapter {
   constructor(input) {
-    assertExactKeys(input, ["spec", "output_dir"], ["codex_binary"], "Codex adapter configuration");
+    assertExactKeys(input, ["spec", "output_dir"], ["codex_args", "codex_binary"], "Codex adapter configuration");
+    assertCint(
+      input.codex_args === undefined ||
+        (Array.isArray(input.codex_args) && input.codex_args.every((value) => typeof value === "string" && value.length > 0)),
+      "CINT_CODEX_ARGS_INVALID",
+      "Codex adapter argument prefix must contain non-empty strings"
+    );
     this.id = "cint.adapter.codex-delegation";
     this.spec = input.spec;
     this.output_dir = path.resolve(input.output_dir);
     this.codex_binary = input.codex_binary;
+    this.codex_args = Object.freeze([...(input.codex_args ?? [])]);
     this.capability = createAdapterCapability({
       id: this.id,
       action_types: ["CODEX_DELEGATED_REVIEW"],
@@ -89,7 +96,8 @@ export class CodexDelegationCintAdapter {
     const run = await runGovernedChild({
       spec: this.spec,
       outputDir: this.output_dir,
-      codexBinary: this.codex_binary
+      codexBinary: this.codex_binary,
+      codexArgs: this.codex_args
     });
     return sealRecord({
       protocol: "cint/codex-delegation-execution/1",

@@ -7,6 +7,8 @@
 - Added pinned, read-only GitHub Actions verification for Node.js 20, 24, and 26
   on Linux, macOS, and Windows.
 - Added a mechanical 13-schema registry and package-surface check.
+- Made immutable AF-G0 tag verification and the legacy adapter test harness
+  reproducible across Linux, macOS, and Windows.
 - Corrected active terminology: public source exposure is yes; public default
   product and public release remain no.
 - Preserved the ten architecture commits without squash, rebase, merge, release,
