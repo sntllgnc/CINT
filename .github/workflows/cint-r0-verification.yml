@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - cint-r0-reassembly
   workflow_dispatch:
 
 permissions:
