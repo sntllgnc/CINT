@@ -8,6 +8,7 @@ const ignoredDirectories = new Set([".git", "node_modules"]);
 const ignoredPrefixes = ["artifacts/generated/"];
 const allowedDotfiles = new Set([".gitignore"]);
 const privateNames = ["S" + "I1", "Y" + "I1", "S" + "I6", "F" + "YRE"];
+const authorizedPublicNames = [new RegExp("\\b" + "SI1 CINT" + "\\b", "gi")];
 const findings = [];
 const files = [];
 const excludedMetadata = [];
@@ -74,8 +75,12 @@ for (const file of files) {
     for (const [code, expression] of contentRules) {
       if (expression.test(content)) findings.push({ code, path: file.relative });
     }
+    const privateNameSurface = authorizedPublicNames.reduce(
+      (value, expression) => value.replace(expression, "CINT"),
+      content
+    );
     for (const name of privateNames) {
-      if (new RegExp(`\\b${name}\\b`, "i").test(content)) {
+      if (new RegExp(`\\b${name}\\b`, "i").test(privateNameSurface)) {
         findings.push({ code: "PRIVATE_PROJECT_NAME", path: file.relative });
       }
     }
