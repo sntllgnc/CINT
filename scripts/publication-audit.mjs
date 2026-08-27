@@ -18,6 +18,7 @@ async function walk(directory) {
   for (const entry of entries) {
     const absolute = path.join(directory, entry.name);
     const relative = path.relative(root, absolute).split(path.sep).join("/");
+    if (entry.name === ".git") continue;
     if (ignoredPrefixes.some((prefix) => relative.startsWith(prefix))) continue;
     if (entry.name === ".DS_Store" || entry.name.startsWith("._")) {
       excludedMetadata.push(relative);

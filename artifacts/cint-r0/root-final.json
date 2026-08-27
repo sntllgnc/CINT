@@ -1,0 +1,60 @@
+{
+  "protocol": "cint/root-final/1",
+  "verdict": "READY-FOR-CINT-REVIEW",
+  "branch": "cint-r0-reassembly",
+  "branch_scope": "LOCAL_ONLY",
+  "baseline": {
+    "commit": "d57a80404e04d2c376cba9cc4b3fc06a5d8c8c49",
+    "tag": "v0.1.0-af-g0",
+    "status": "FROZEN_HISTORICAL_FOUNDATION"
+  },
+  "successor": {
+    "product": "SI1 CINT",
+    "descriptor": "Machine Counterintelligence Runtime",
+    "release_state": "LOCAL_R0_CANDIDATE",
+    "legacy_adapter": "CINT Adapter 01"
+  },
+  "gate_ledger": {
+    "passed": 9,
+    "failed": 0,
+    "range": "CINT-R0.G0..CINT-R0.G8",
+    "modifying_commits": 8
+  },
+  "verification": {
+    "source": "independent-detached-clean-worktree",
+    "tests": {
+      "total": 53,
+      "passed": 53,
+      "failed": 0
+    },
+    "schemas": 11,
+    "threat_model_source_citations": 38,
+    "active_documents": 10,
+    "readme_local_links": 13,
+    "npm_audit_vulnerabilities": 0,
+    "publication_audit_findings": 0,
+    "historical_evidence_entries": 53,
+    "package_dry_run": "PASS",
+    "worktree": "CLEAN"
+  },
+  "changed_file_register": {
+    "comparison": "d57a80404e04d2c376cba9cc4b3fc06a5d8c8c49..HEAD",
+    "paths": 102,
+    "added": 76,
+    "modified": 21,
+    "renamed": 5,
+    "query": "git diff --name-status d57a80404e04d2c376cba9cc4b3fc06a5d8c8c49..HEAD"
+  },
+  "authority": {
+    "publication": "NONE",
+    "push": "NONE",
+    "release": "NONE",
+    "repository_rename": "NONE",
+    "npm_publication": "NONE",
+    "external_announcement": "NONE",
+    "public_actions": 0,
+    "remote_mutations": 0
+  },
+  "next_authority": "/D. REVIEW AFTER READY-FOR-CINT-REVIEW",
+  "resume_marker": "CINT-R0-FOUNDATION-REASSEMBLY / LOCAL-BRANCH / NO-PUSH / AWAITING-/D.-REVIEW"
+}

@@ -52,7 +52,13 @@
       "name": "Documentation and technology reassembly",
       "status": "PASS",
       "evidence": "docs/cint-r0/07_DOCUMENTATION_REASSEMBLY.md"
+    },
+    {
+      "gate": "CINT-R0.G8",
+      "name": "Independent clean verification",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/08_TERMINAL_VERDICT.md"
     }
   ],
-  "terminal_verdict": null
+  "terminal_verdict": "READY-FOR-CINT-REVIEW"
 }
