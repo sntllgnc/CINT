@@ -11,6 +11,7 @@ import {
   decide,
   parseCanonicalJson,
   resolvePrincipal,
+  sealRecord,
   transitionState
 } from "../src/cint/index.js";
 import { canonicalJson } from "../src/util.js";
@@ -85,6 +86,7 @@ function records(overrides = {}) {
     id: "cint.adapter.synthetic-file-patch",
     action_types: ["SYNTHETIC_FILE_PATCH"],
     consequence_classes: ["CONSEQUENTIAL"],
+    prepare_side_effect_free: true,
     rollback: true,
     interrupt: true,
     outcome_verification: true,
@@ -188,6 +190,20 @@ test("tampered sealed input cannot reach a decision", () => {
   assert.throws(
     () => decideRecords({ ...values, intent: tamperedIntent }),
     (error) => error.code === "CINT_RECORD_TAMPERED"
+  );
+});
+
+test("rehashed authority with an alien protocol cannot reach ADMIT", () => {
+  const current = records();
+  const { digest, ...unsigned } = current.authority;
+  const forged = sealRecord({
+    ...unsigned,
+    protocol: "not-cint/authority/999",
+    schema_forbidden_field: true
+  });
+  assert.throws(
+    () => decideRecords({ ...current, authority: forged }, { id: "decision.schema-invalid-authority" }),
+    (error) => error.code === "CINT_PROTOCOL_INVALID"
   );
 });
 

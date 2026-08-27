@@ -6,6 +6,7 @@ import {
   isoInstant,
   sealRecord,
   stringArray,
+  verifyProtocolRecord,
   verifySealedRecord
 } from "./canonical.js";
 
@@ -74,8 +75,8 @@ export function createPolicySnapshot(input) {
 }
 
 export function evaluatePolicy({ policy, intent, adapter_capability }) {
-  verifySealedRecord(policy, "policy");
-  verifySealedRecord(intent, "intent");
+  verifyProtocolRecord(policy, "cint/policy/1", "policy");
+  verifyProtocolRecord(intent, "cint/intent/1", "intent");
   verifySealedRecord(adapter_capability, "adapter capability");
   const reasons = [];
   if (policy.status !== "ACTIVE") reasons.push("CINT_POLICY_INACTIVE");

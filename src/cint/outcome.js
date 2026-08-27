@@ -1,4 +1,11 @@
-import { assertCint, assertExactKeys, isoInstant, sealRecord, verifySealedRecord } from "./canonical.js";
+import {
+  assertCint,
+  assertExactKeys,
+  isoInstant,
+  sealRecord,
+  verifyProtocolRecord,
+  verifySealedRecord
+} from "./canonical.js";
 
 export function createOutcome(input) {
   assertExactKeys(
@@ -7,7 +14,7 @@ export function createOutcome(input) {
     [],
     "outcome"
   );
-  verifySealedRecord(input.receipt, "receipt");
+  verifyProtocolRecord(input.receipt, "cint/decision-receipt/1", "receipt");
   verifySealedRecord(input.execution, "execution");
   verifySealedRecord(input.verification, "outcome verification");
   if (input.rollback !== null) verifySealedRecord(input.rollback, "rollback");

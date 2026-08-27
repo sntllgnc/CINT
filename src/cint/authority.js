@@ -9,7 +9,7 @@ import {
   isoInstant,
   sealRecord,
   stringArray,
-  verifySealedRecord
+  verifyProtocolRecord
 } from "./canonical.js";
 
 function grantRecord(value, index) {
@@ -71,7 +71,7 @@ export function createAuthorityGrant(input) {
 }
 
 export function revokeAuthority(authority, input) {
-  verifySealedRecord(authority, "authority");
+  verifyProtocolRecord(authority, "cint/authority/1", "authority");
   assertExactKeys(input, ["revoked_at", "reason"], [], "authority revocation");
   const revokedAt = isoInstant(input.revoked_at, "authority.revoked_at");
   assertCint(authority.status === "ACTIVE", "CINT_AUTHORITY_INACTIVE", "Only active authority can be revoked");
@@ -87,9 +87,9 @@ export function revokeAuthority(authority, input) {
 }
 
 export function evaluateAuthority({ authority, intent, policy, now }) {
-  verifySealedRecord(authority, "authority");
-  verifySealedRecord(intent, "intent");
-  if (policy) verifySealedRecord(policy, "policy");
+  verifyProtocolRecord(authority, "cint/authority/1", "authority");
+  verifyProtocolRecord(intent, "cint/intent/1", "intent");
+  if (policy) verifyProtocolRecord(policy, "cint/policy/1", "policy");
   const at = isoInstant(now, "authority evaluation time");
   const reasons = [];
   if (authority.status !== "ACTIVE") reasons.push("CINT_AUTHORITY_INACTIVE");

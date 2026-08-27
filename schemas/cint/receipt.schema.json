@@ -30,7 +30,7 @@
     "issued_at": { "type": "string", "format": "date-time" },
     "expires_at": { "type": "string", "format": "date-time" },
     "nonce": { "type": "string", "minLength": 16, "maxLength": 128 },
-    "binding": { "$ref": "decision.schema.json#/properties/binding" },
+    "binding": { "$ref": "https://cint.invalid/schema/decision-1.json#/properties/binding" },
     "binding_digest": { "$ref": "#/$defs/sha256" },
     "signature_algorithm": { "const": "HMAC-SHA256" },
     "signature": { "$ref": "#/$defs/sha256" },

@@ -14,6 +14,7 @@ import {
   immutableRecord,
   isoInstant,
   sealRecord,
+  verifyProtocolRecord,
   verifySealedRecord
 } from "../../canonical.js";
 import { createAdapterCapability } from "../../challenge.js";
@@ -57,6 +58,7 @@ export class CodexDelegationCintAdapter {
       id: this.id,
       action_types: ["CODEX_DELEGATED_REVIEW"],
       consequence_classes: ["READ_ONLY"],
+      prepare_side_effect_free: true,
       rollback: false,
       interrupt: false,
       outcome_verification: true
@@ -65,7 +67,7 @@ export class CodexDelegationCintAdapter {
   }
 
   async prepare(intent, options) {
-    verifySealedRecord(intent, "intent");
+    verifyProtocolRecord(intent, "cint/intent/1", "intent");
     assertCint(intent.action.adapter === this.id, "CINT_ADAPTER_MISMATCH", "Intent does not target the Codex delegation adapter");
     assertCint(intent.action.type === "CODEX_DELEGATED_REVIEW", "CINT_ADAPTER_ACTION_UNSUPPORTED", "Codex adapter supports delegated review only");
     assertCint(intent.action.consequence === "READ_ONLY", "CINT_ADAPTER_CONSEQUENCE_UNSUPPORTED", "Legacy Codex adapter is read-only");

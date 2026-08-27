@@ -1,4 +1,5 @@
 import { canonicalJson, canonicalize, sha256 } from "../util.js";
+import { validateCintSchema } from "./schema.js";
 
 const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
@@ -130,7 +131,15 @@ export function immutableRecord(value) {
 export function sealRecord(value) {
   assertCint(!Object.hasOwn(value, "digest"), "CINT_DIGEST_PRESET", "Record digest must be computed by CINT");
   const canonical = canonicalize(value);
-  return immutableRecord({ ...canonical, digest: canonicalDigest(canonical) });
+  const sealed = { ...canonical, digest: canonicalDigest(canonical) };
+  const validation = validateCintSchema(sealed);
+  assertCint(
+    !validation.known || validation.valid,
+    "CINT_SCHEMA_INVALID",
+    `Record does not satisfy the ${sealed.protocol} runtime schema`,
+    { errors: validation.errors }
+  );
+  return immutableRecord(sealed);
 }
 
 export function verifySealedRecord(value, label = "record") {
@@ -142,5 +151,26 @@ export function verifySealedRecord(value, label = "record") {
     "CINT_RECORD_TAMPERED",
     `${label} digest does not match its content`
   );
+  const validation = validateCintSchema(value);
+  assertCint(
+    !validation.known || validation.valid,
+    "CINT_SCHEMA_INVALID",
+    `${label} does not satisfy the ${value.protocol} runtime schema`,
+    { errors: validation.errors }
+  );
+  return value;
+}
+
+export function verifyProtocolRecord(value, protocol, label = "record") {
+  verifySealedRecord(value, label);
+  assertCint(value.protocol === protocol, "CINT_PROTOCOL_INVALID", `${label} uses an unsupported protocol`, {
+    expected: protocol,
+    actual: value.protocol ?? null
+  });
+  const validation = validateCintSchema(value, protocol);
+  assertCint(validation.known, "CINT_SCHEMA_UNAVAILABLE", `Runtime schema is unavailable for ${protocol}`);
+  assertCint(validation.valid, "CINT_SCHEMA_INVALID", `${label} does not satisfy the ${protocol} runtime schema`, {
+    errors: validation.errors
+  });
   return value;
 }

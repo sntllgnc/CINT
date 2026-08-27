@@ -5,13 +5,11 @@ import path from "node:path";
 import test from "node:test";
 
 import {
-  CodexDelegationCintAdapter,
   DecisionReceiptAuthority,
   ExecutionLedger,
   FileReceiptStore,
   OutcomeSealAuthority,
   createAuthorityGrant,
-  createCodexDelegationAction,
   createIntent,
   createMachineStateSnapshot,
   createPolicySnapshot,
@@ -19,6 +17,10 @@ import {
   executeWithReceipt,
   resolvePrincipal
 } from "../src/cint/index.js";
+import {
+  CodexDelegationCintAdapter,
+  createCodexDelegationAction
+} from "../src/cint/adapters/codex/index.js";
 import { DEMO_SPEC, PROJECT_ROOT } from "../src/demo.js";
 import { loadTaskSpec } from "../src/policy.js";
 

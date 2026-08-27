@@ -86,6 +86,7 @@ function decisionFor(overrides = {}) {
     id: "cint.adapter.synthetic-file-patch",
     action_types: ["SYNTHETIC_FILE_PATCH"],
     consequence_classes: ["CONSEQUENTIAL"],
+    prepare_side_effect_free: true,
     rollback: true,
     interrupt: true,
     outcome_verification: true

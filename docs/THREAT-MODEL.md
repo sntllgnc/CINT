@@ -12,13 +12,13 @@ valid consumed receipt can reach an action adapter.
 
 | Component | Security role | Source evidence |
 |---|---|---|
-| Canonical records | Reject unknown fields and tampered digests | `src/cint/canonical.js:25-46`, `src/cint/canonical.js:130-147` |
+| Canonical records | Execute all 11 public schemas; reject unknown fields, wrong protocols, and tampered digests | `src/cint/schema.js`, `src/cint/canonical.js` |
 | Intent reconstruction | Bind request, action, target, context, effects, and uncertainty | `src/cint/intent.js:33-67` |
 | Authority and policy | Enforce exact grants, epochs, validity, allowed adapters, and rollback policy | `src/cint/authority.js:24-110`, `src/cint/policy.js:12-97` |
 | Counter-intent and decision | Deny silent or mismatched intent; route uncertainty; keep decisions non-executable | `src/cint/challenge.js:54-127`, `src/cint/decision.js:11-67` |
 | Receipt authority | Authenticate eligible decision bindings and lifetime | `src/cint/receipt.js:22-119` |
 | Receipt store | Register, lock, revalidate, consume once, and terminally reject | `src/cint/store.js:39-190` |
-| Execution gate | Revalidate inside the lock and again before adapter execution | `src/cint/execution.js:82-283` |
+| Execution gate | Preflight verifiers, revalidate inside the lock, before preparation, and immediately after preparation before execution | `src/cint/execution.js` |
 | Outcome, ledger, and seal | Verify or restore state; hash-chain and authenticate terminal evidence | `src/cint/outcome.js:3-31`, `src/cint/evidence.js:16-85`, `src/cint/seal.js:18-110` |
 | Synthetic adapter | Confine a disposable patch and restore exact original bytes | `src/cint/adapters/synthetic-file-patch.js:34-125` |
 | Codex Adapter 01 | Bind and execute the preserved read-only Agent Floor packet | `src/cint/adapters/codex/index.js:49-128` |
@@ -32,7 +32,9 @@ flowchart LR
   D --> R[Signed one-shot receipt]
   R --> S[Lock + revalidate + consume]
   S --> V[Fresh revalidation]
-  V --> A[Exact adapter action]
+  V --> P[Side-effect-free preparation]
+  P --> F[Execution-bound revalidation]
+  F --> A[Exact adapter action]
   A --> O[Verify outcome]
   O -->|match| E[Evidence seal]
   O -->|diverge / interrupt| B[Rollback + hash check]
@@ -86,11 +88,14 @@ flowchart LR
 4. A receipt crosses into the store. Signature and lifetime verification,
    immediate revalidation, exclusive locking, and digest comparison precede
    consumption.
-5. A consumed receipt crosses into the action adapter only after a fresh second
-   revalidation. Adapter identity and capability must still match.
-6. Adapter output crosses into outcome verification. A divergent or interrupted
+5. A consumed receipt reaches side-effect-free adapter preparation only after a
+   fresh second revalidation and exact runtime-capability match.
+6. Prepared state reaches adapter execution only after a third fresh
+   revalidation. Adapter identity and the full capability digest must still
+   match, and no asynchronous operation intervenes before invocation.
+7. Adapter output crosses into outcome verification. A divergent or interrupted
    synthetic effect crosses into rollback before any seal is permitted.
-7. Verified/restored outcome and hash-chained ledger head cross into the seal
+8. Verified/restored outcome and hash-chained ledger head cross into the seal
    authority. The adapter cannot cross this boundary directly.
 
 ### Assumptions and exclusions
@@ -102,6 +107,9 @@ flowchart LR
   by a trusted local embedding process with appropriate filesystem permissions.
 - R0 does not provide distributed consensus, cross-host atomicity, hardware key
   protection, automatic stale-lock recovery, or hostile-code containment.
+- R0 trusts the selected in-process adapter implementation to honor its signed
+  side-effect-free preparation contract. The core detects bound-state drift
+  after preparation but does not sandbox arbitrary adapter code.
 - The Codex adapter is read-only toward its source projection. Its selected
   evidence directory is intentionally writable and remains sensitive local
   state.
@@ -115,13 +123,23 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | P0 | Forge or alter a receipt to execute a different action | Attacker obtains a valid receipt but not the key | Unauthorized action or target | Record digest, exact binding digest, HMAC, issuer, status, and expiry checks | Keep keys outside adapters; rotate on suspected exposure | `src/cint/receipt.js:40-119`; forgery test in `tests/cint-receipt.test.js` |
 | P0 | Replay one receipt concurrently or after success | Copy of an issued receipt | Duplicate consequential action | Hashed identifier, exclusive lock, consumed/rejected terminal record | Protect store permissions; preserve terminal records through retention window | `src/cint/store.js:66-190`; parallel replay tests |
-| P0 | Change action, target, policy, authority, adapter, or machine state after decision | Local mutation between decision and execution | Stale authority becomes action | Revalidation inside lock plus fresh revalidation after consumption | Embed policy and state providers with authoritative current snapshots | `src/cint/revalidation.js:8-127`, `src/cint/execution.js:132-191` |
+| P0 | Change action, target, policy, authority, adapter, or machine state after decision | Local mutation between decision and execution | Stale authority becomes action | Revalidation inside the receipt lock, before preparation, and after preparation immediately before execution | Embed policy and state providers with authoritative current snapshots | `src/cint/revalidation.js`, `src/cint/execution.js`; preparation-drift regressions |
 | P0 | Mutate synthetic target after receipt consumption | Local writer can change the disposable file | Wrong bytes overwritten | Expected pre-action hash checked during prepare and immediately before atomic write | Use exclusive target ownership where stronger serialization is required | `src/cint/adapters/synthetic-file-patch.js:48-98` |
 | P0 | Adapter reports success despite divergent state | Buggy or hostile adapter result | False terminal success | Independent adapter verification; synthetic divergence invokes rollback; core seal requires verified/restored outcome | Add independent verifiers for future consequential adapters | `src/cint/execution.js:203-235`, `src/cint/outcome.js:3-31` |
 | P1 | Crash leaves receipt lock behind | Process interruption while holding lock | Local denial of service, not unauthorized execution | Ambiguous lock remains fail closed | Define a separately authorized recovery receipt and operator procedure before production use | `src/cint/store.js:107-190`; crash-lock test |
 | P1 | Tamper with ledger or terminal evidence | Local filesystem write access | Audit confusion | Canonical entries, sequence, previous digest, evidence seal over ledger head | Store sealed bundles on append-only or separately protected storage | `src/cint/evidence.js:24-85`, `src/cint/seal.js:37-110` |
 | P1 | Malicious allowed source instructs Codex to escape policy | Hostile content inside source allowlist | False model conclusion or attempted tool use | Temporary allowlisted projection, read-only sandbox, disabled fan-out/features, schema and legacy evidence verification, then CINT outcome verification | Use stronger process/container isolation for hostile content | `src/adapters/codex-delegation/runner.js:198-258`, `src/adapters/codex-delegation/runner.js:376-501` |
 | P2 | Legacy `ADMITTED` is mistaken for CINT authority by a consumer | Consumer ignores the wrapper contract | Incorrect downstream authorization | Wrapper exposes no authority methods; CINT independently requires decision and receipt | Consumers must use only `cint/execution-result/1` and evidence seals | `src/adapters/codex-delegation/index.js:7-24`, `src/cint/adapters/codex/index.js:49-128` |
+
+### Control-status discipline
+
+| Classification | R0 meaning | Examples |
+|---|---|---|
+| Mechanically prevented | The runtime blocks the transition before action | Missing verifier preflight, schema/protocol rejection, receipt replay, stale authority or policy at final revalidation |
+| Detected and contained | The action began, but verification detected divergence and the implemented adapter restored the bounded target | Synthetic outcome divergence or interruption followed by hash-verified rollback |
+| Evidenced | The runtime records a fact but the record is not itself execution authority | Decision status, receipt consumption, ledger events, adapter result, evidence seal |
+| Deferred | A stronger control requires a later architecture or deployment decision | Cross-host consensus, hardware key custody, adapter-specific external transactions, machine-resident enforcement |
+| Unimplemented | R0 intentionally supplies no mechanism | Automatic stale-lock recovery, public-key attestation, hostile in-process adapter containment |
 
 ## 4. Severity Calibration
 

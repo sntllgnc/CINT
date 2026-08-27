@@ -1,4 +1,4 @@
-import { isoInstant, sealRecord, verifySealedRecord } from "./canonical.js";
+import { isoInstant, sealRecord, verifyProtocolRecord, verifySealedRecord } from "./canonical.js";
 import { runCounterIntentChallenge } from "./challenge.js";
 
 function unique(values) {
@@ -16,16 +16,17 @@ export function revalidateReceipt(input) {
     reasonCodes.push(error.code ?? "CINT_RECEIPT_INVALID");
   }
 
-  for (const [label, record] of Object.entries({
-    intent: input.intent,
-    principal: input.principal,
-    authority: input.authority,
-    policy: input.policy,
-    adapter_capability: input.adapter_capability,
-    machine_state: input.machine_state
-  })) {
+  for (const [label, record, protocol] of [
+    ["intent", input.intent, "cint/intent/1"],
+    ["principal", input.principal, "cint/principal/1"],
+    ["authority", input.authority, "cint/authority/1"],
+    ["policy", input.policy, "cint/policy/1"],
+    ["adapter_capability", input.adapter_capability, null],
+    ["machine_state", input.machine_state, null]
+  ]) {
     try {
-      verifySealedRecord(record, label);
+      if (protocol) verifyProtocolRecord(record, protocol, label);
+      else verifySealedRecord(record, label);
     } catch (error) {
       reasonCodes.push(error.code ?? "CINT_RECORD_INVALID");
     }
@@ -97,6 +98,8 @@ export function revalidateReceipt(input) {
       "CINT_TARGET_CHANGED",
       "CINT_CONTEXT_CHANGED",
       "CINT_INTENT_CHANGED",
+      "CINT_PROTOCOL_INVALID",
+      "CINT_SCHEMA_INVALID",
       "CINT_RECORD_TAMPERED"
     ].includes(code)
   );

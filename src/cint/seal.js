@@ -8,6 +8,7 @@ import {
   isoInstant,
   sealRecord,
   sha256Digest,
+  verifyProtocolRecord,
   verifySealedRecord
 } from "./canonical.js";
 
@@ -38,15 +39,11 @@ export class OutcomeSealAuthority {
       ["id"],
       "outcome seal issuance"
     );
-    for (const [label, record] of Object.entries({
-      receipt: input.receipt,
-      consumption: input.consumption,
-      revalidation: input.revalidation,
-      outcome: input.outcome,
-      ledger_head: input.ledger_head
-    })) {
-      verifySealedRecord(record, label);
-    }
+    verifyProtocolRecord(input.receipt, "cint/decision-receipt/1", "receipt");
+    verifySealedRecord(input.consumption, "consumption");
+    verifyProtocolRecord(input.revalidation, "cint/revalidation/1", "revalidation");
+    verifyProtocolRecord(input.outcome, "cint/outcome/1", "outcome");
+    verifySealedRecord(input.ledger_head, "ledger head");
     assertCint(["VERIFIED", "ROLLED_BACK"].includes(input.outcome.status), "CINT_SEAL_OUTCOME_INVALID", "Only verified or restored outcomes can be sealed");
     assertCint(input.outcome.receipt_digest === input.receipt.digest, "CINT_SEAL_BINDING_INVALID", "Outcome is bound to a different receipt");
     assertCint(input.consumption.receipt_digest === input.receipt.digest, "CINT_SEAL_BINDING_INVALID", "Consumption is bound to a different receipt");
@@ -70,7 +67,7 @@ export class OutcomeSealAuthority {
   }
 
   verify(seal) {
-    verifySealedRecord(seal, "evidence seal");
+    verifyProtocolRecord(seal, "cint/evidence-seal/1", "evidence seal");
     assertExactKeys(
       seal,
       [

@@ -12,6 +12,9 @@ CINT-R0 enforces these properties for its implemented local adapters:
 - every receipt expires, revalidates, and reaches one terminal store state;
 - replay, substitution, forgery, stale policy, revoked authority, drift, and
   unavailable controls stop before action;
+- all 11 public authority-bearing schemas execute at record construction and
+  verification boundaries;
+- missing adapter or seal verification fails before receipt consumption;
 - outcome verification is distinct from execution;
 - divergent or interrupted synthetic effects are restored and hash-verified;
 - only verified or restored outcomes receive a core evidence seal;
@@ -21,7 +24,7 @@ CINT-R0 enforces these properties for its implemented local adapters:
 
 | Boundary | Enforcing component |
 |---|---|
-| Strict JSON and record integrity | `src/cint/canonical.js` |
+| Strict JSON, runtime schemas, and record integrity | `src/cint/schema.js` and `src/cint/canonical.js` |
 | Exact action scope and time-bound authority | `src/cint/authority.js` |
 | Silent request and counter-intent challenge | `src/cint/challenge.js` |
 | Zero-authority decision | `src/cint/decision.js` |
@@ -59,7 +62,9 @@ undeclared effects, target scope, missing rollback, record tampering, signature
 forgery, expiry, concurrent replay, crash locks, policy drift before and after
 consumption, target drift, unavailable services, divergence, interrupt,
 rollback restoration, evidence sealing, adapter authority separation, and
-legacy packet drift.
+legacy packet drift. It also executes the independent-review regressions for a
+missing adapter verifier, preparation-time policy and authority drift, invalid
+rehashed authority, all 11 schemas, and denied eager Adapter 01 loading.
 
 The publication audit continues to reject local absolute paths, raw logs,
 credential formats, email addresses, session identifiers, hidden metadata, and

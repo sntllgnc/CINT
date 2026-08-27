@@ -5,6 +5,7 @@ import {
   isoInstant,
   sealRecord,
   stringArray,
+  verifyProtocolRecord,
   verifySealedRecord
 } from "./canonical.js";
 import { evaluateAuthority } from "./authority.js";
@@ -19,11 +20,19 @@ function challengeReason(code, disposition, message) {
 export function createAdapterCapability(input) {
   assertExactKeys(
     input,
-    ["id", "action_types", "consequence_classes", "rollback", "interrupt", "outcome_verification"],
+    [
+      "id",
+      "action_types",
+      "consequence_classes",
+      "prepare_side_effect_free",
+      "rollback",
+      "interrupt",
+      "outcome_verification"
+    ],
     [],
     "adapter capability"
   );
-  for (const field of ["rollback", "interrupt", "outcome_verification"]) {
+  for (const field of ["prepare_side_effect_free", "rollback", "interrupt", "outcome_verification"]) {
     assertCint(typeof input[field] === "boolean", "CINT_ADAPTER_CAPABILITY_INVALID", `adapter capability ${field} must be boolean`);
   }
   const consequenceClasses = stringArray(input.consequence_classes, "adapter consequence classes", {
@@ -45,6 +54,7 @@ export function createAdapterCapability(input) {
       bytes: 128
     }).map((value) => identifier(value, "adapter action type")),
     consequence_classes: consequenceClasses,
+    prepare_side_effect_free: input.prepare_side_effect_free,
     rollback: input.rollback,
     interrupt: input.interrupt,
     outcome_verification: input.outcome_verification
@@ -60,16 +70,12 @@ export function runCounterIntentChallenge({
   machine_state,
   now
 }) {
-  for (const [label, record] of Object.entries({
-    intent,
-    principal,
-    authority,
-    policy,
-    adapter_capability,
-    machine_state
-  })) {
-    verifySealedRecord(record, label);
-  }
+  verifyProtocolRecord(intent, "cint/intent/1", "intent");
+  verifyProtocolRecord(principal, "cint/principal/1", "principal");
+  verifyProtocolRecord(authority, "cint/authority/1", "authority");
+  verifyProtocolRecord(policy, "cint/policy/1", "policy");
+  verifySealedRecord(adapter_capability, "adapter capability");
+  verifySealedRecord(machine_state, "machine state");
   const checkedAt = isoInstant(now, "challenge time");
   const reasons = [];
   if (!machine_state.available) {
@@ -86,6 +92,9 @@ export function runCounterIntentChallenge({
   }
   if (adapter_capability.id !== intent.action.adapter) {
     reasons.push(challengeReason("CINT_ADAPTER_MISMATCH", "DENY", "Intent names a different adapter"));
+  }
+  if (adapter_capability.prepare_side_effect_free !== true) {
+    reasons.push(challengeReason("CINT_ADAPTER_PREPARE_UNSAFE", "DENY", "Adapter preparation is not side-effect-free"));
   }
   if (policy.require_explicit_request && intent.request === null) {
     reasons.push(challengeReason("CINT_SILENT_REQUEST", "DENY", "No explicit principal request authorizes the action"));

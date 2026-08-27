@@ -26,8 +26,8 @@
     "consumption_digest": { "$ref": "#/$defs/nullableSha256" },
     "revalidation_digest": { "$ref": "#/$defs/nullableSha256" },
     "action_started": { "type": "boolean" },
-    "outcome": { "oneOf": [{ "$ref": "outcome.schema.json" }, { "type": "null" }] },
-    "evidence_seal": { "oneOf": [{ "$ref": "seal.schema.json" }, { "type": "null" }] },
+    "outcome": { "oneOf": [{ "$ref": "https://cint.invalid/schema/outcome-1.json" }, { "type": "null" }] },
+    "evidence_seal": { "oneOf": [{ "$ref": "https://cint.invalid/schema/seal-1.json" }, { "type": "null" }] },
     "error_code": { "type": ["string", "null"] },
     "completed_at": { "type": "string", "format": "date-time" },
     "digest": { "$ref": "#/$defs/sha256" }

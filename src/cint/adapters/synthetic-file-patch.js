@@ -11,6 +11,7 @@ import {
   isoInstant,
   sealRecord,
   sha256Digest,
+  verifyProtocolRecord,
   verifySealedRecord
 } from "../canonical.js";
 import { createAdapterCapability } from "../challenge.js";
@@ -39,6 +40,7 @@ export class SyntheticFilePatchAdapter {
       id: this.id,
       action_types: ["SYNTHETIC_FILE_PATCH"],
       consequence_classes: ["CONSEQUENTIAL"],
+      prepare_side_effect_free: true,
       rollback: true,
       interrupt: true,
       outcome_verification: true
@@ -46,7 +48,7 @@ export class SyntheticFilePatchAdapter {
   }
 
   async prepare(intent, options) {
-    verifySealedRecord(intent, "intent");
+    verifyProtocolRecord(intent, "cint/intent/1", "intent");
     assertCint(intent.action.adapter === this.id, "CINT_ADAPTER_MISMATCH", "Intent does not target the synthetic adapter");
     assertCint(intent.action.type === "SYNTHETIC_FILE_PATCH", "CINT_ADAPTER_ACTION_UNSUPPORTED", "Synthetic adapter supports only file patch actions");
     assertExactKeys(intent.action.target, ["path"], [], "synthetic target");

@@ -1,4 +1,3 @@
-import { main as legacyMain } from "../cli.js";
 import { CintError } from "./canonical.js";
 
 export const CINT_IDENTITY = Object.freeze({
@@ -44,6 +43,9 @@ export async function main(argv = process.argv.slice(2), options = {}) {
     write(`${JSON.stringify({ protocol: "cint/schema-index/1", directory: "schemas/cint", strict: true }, null, 2)}\n`);
     return 0;
   }
-  if (command === "legacy") return legacyMain(rest);
+  if (command === "legacy") {
+    const { main: legacyMain } = await import("../cli.js");
+    return legacyMain(rest);
+  }
   throw new CintError("CINT_CLI_COMMAND", `Unknown CINT command: ${command}`);
 }

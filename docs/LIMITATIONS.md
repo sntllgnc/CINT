@@ -11,6 +11,10 @@
 - Revalidation is event-bound, not continuous at every CPU instruction. Future
   adapters that touch concurrent external systems need an adapter-specific
   transaction or conditional-write mechanism.
+- Adapter capability records require preparation to be side-effect-free, and
+  the core revalidates after preparation. R0 trusts the selected in-process
+  adapter implementation to honor that contract; it does not sandbox hostile
+  adapter code or prove the absence of unrelated side effects.
 - The synthetic adapter proves one disposable existing-file mutation. It does
   not authorize mutation of another repository or live machine state.
 - The Codex adapter is read-only toward its source projection. Its output

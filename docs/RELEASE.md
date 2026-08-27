@@ -14,11 +14,12 @@
 
 ## Local candidate contents
 
-- strict canonical contracts and schemas;
+- strict canonical contracts and runtime enforcement of all 11 public schemas;
 - principal, authority, policy, challenge, and decision engine;
 - signed action-bound one-shot receipts;
 - atomic consumption, replay rejection, expiry, and revocation;
-- pre-action revalidation and fail-closed execution;
+- receipt-locked, pre-preparation, and execution-bound revalidation with
+  fail-closed dependency preflight;
 - synthetic action, verification, interrupt, rollback, ledger, and seal;
 - preserved Agent Floor foundation as Codex Adapter 01;
 - gate-by-gate local commits and evidence artifacts.

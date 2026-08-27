@@ -1,6 +1,4 @@
 export * from "./authority.js";
-export * from "./adapters/synthetic-file-patch.js";
-export * from "./adapters/codex/index.js";
 export * from "./canonical.js";
 export * from "./challenge.js";
 export * from "./cli.js";
@@ -15,6 +13,7 @@ export * from "./principal.js";
 export * from "./receipt.js";
 export * from "./revalidation.js";
 export * from "./rollback.js";
+export * from "./schema.js";
 export * from "./seal.js";
 export * from "./state-machine.js";
 export * from "./store.js";

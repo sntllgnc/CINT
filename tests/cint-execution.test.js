@@ -6,11 +6,12 @@ import test from "node:test";
 
 import {
   CintError,
+  CINT_SCHEMA_PROTOCOLS,
   DecisionReceiptAuthority,
   ExecutionLedger,
   FileReceiptStore,
   OutcomeSealAuthority,
-  SyntheticFilePatchAdapter,
+  canonicalDigest,
   createAdapterCapability,
   createAuthorityGrant,
   createIntent,
@@ -18,8 +19,15 @@ import {
   createPolicySnapshot,
   decide,
   executeWithReceipt,
-  resolvePrincipal
+  resolvePrincipal,
+  revalidateReceipt,
+  revokeAuthority,
+  runCounterIntentChallenge,
+  sealRecord,
+  validateCintSchema,
+  verifyProtocolRecord
 } from "../src/cint/index.js";
+import { SyntheticFilePatchAdapter } from "../src/cint/adapters/synthetic-file-patch.js";
 import { sha256 } from "../src/util.js";
 
 const T0 = "2026-08-27T00:00:00.000Z";
@@ -218,6 +226,7 @@ test("silent, out-of-authority, and rollback-free actions cannot obtain a receip
       id: "cint.adapter.synthetic-file-patch",
       action_types: ["SYNTHETIC_FILE_PATCH"],
       consequence_classes: ["CONSEQUENTIAL"],
+      prepare_side_effect_free: true,
       rollback: false,
       interrupt: true,
       outcome_verification: true
@@ -331,6 +340,175 @@ test("unavailable CINT dependency fails closed without consuming or acting", asy
     assert.equal(result.action_started, false);
     assert.equal((await runtime.store.inspect(runtime.receipt.id)).state, "PENDING");
     assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("missing adapter verifier fails closed before receipt consumption", async () => {
+  await withRuntime(async (runtime) => {
+    const adapter = {
+      id: runtime.adapter.id,
+      capability: runtime.adapter.capability,
+      prepare: runtime.adapter.prepare.bind(runtime.adapter),
+      execute: runtime.adapter.execute.bind(runtime.adapter),
+      rollback: runtime.adapter.rollback.bind(runtime.adapter)
+    };
+    const result = await runtime.execute({ adapter });
+    assert.equal(result.status, "FAIL_CLOSED");
+    assert.equal(result.error_code, "CINT_UNAVAILABLE");
+    assert.equal(result.action_started, false);
+    assert.equal((await runtime.store.inspect(runtime.receipt.id)).state, "PENDING");
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("runtime adapter capability mismatch is rejected before preparation", async () => {
+  await withRuntime(async (runtime) => {
+    let prepareCalls = 0;
+    const capability = createAdapterCapability({
+      id: runtime.adapter.id,
+      action_types: ["SYNTHETIC_FILE_PATCH"],
+      consequence_classes: ["CONSEQUENTIAL"],
+      prepare_side_effect_free: true,
+      rollback: true,
+      interrupt: false,
+      outcome_verification: true
+    });
+    const adapter = {
+      id: runtime.adapter.id,
+      capability,
+      prepare: async (...args) => {
+        prepareCalls += 1;
+        return runtime.adapter.prepare(...args);
+      },
+      execute: runtime.adapter.execute.bind(runtime.adapter),
+      verify: runtime.adapter.verify.bind(runtime.adapter),
+      rollback: runtime.adapter.rollback.bind(runtime.adapter)
+    };
+    const result = await runtime.execute({ adapter });
+    assert.equal(result.status, "FAIL_CLOSED");
+    assert.equal(result.error_code, "CINT_ADAPTER_MISMATCH");
+    assert.equal(result.action_started, false);
+    assert.equal(prepareCalls, 0);
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("policy drift introduced during preparation is revalidated before execution", async () => {
+  await withRuntime(async (runtime) => {
+    let activeSnapshot = runtime.snapshot;
+    let snapshotCalls = 0;
+    let executeCalls = 0;
+    const adapter = {
+      id: runtime.adapter.id,
+      capability: runtime.adapter.capability,
+      prepare: async (...args) => {
+        const prepared = await runtime.adapter.prepare(...args);
+        activeSnapshot = {
+          ...runtime.snapshot,
+          policy: runtime.makePolicy({ version: "r0.2", epoch: 2, issued_at: T1 })
+        };
+        return prepared;
+      },
+      execute: async (...args) => {
+        executeCalls += 1;
+        return runtime.adapter.execute(...args);
+      },
+      verify: runtime.adapter.verify.bind(runtime.adapter),
+      rollback: runtime.adapter.rollback.bind(runtime.adapter)
+    };
+    const result = await runtime.execute({
+      adapter,
+      snapshot_provider: async () => {
+        snapshotCalls += 1;
+        return activeSnapshot;
+      }
+    });
+    assert.equal(result.status, "REVOKED");
+    assert.equal(result.action_started, false);
+    assert.equal(snapshotCalls, 3);
+    assert.equal(executeCalls, 0);
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("authority revocation introduced during preparation is revalidated before execution", async () => {
+  await withRuntime(async (runtime) => {
+    let activeSnapshot = runtime.snapshot;
+    let executeCalls = 0;
+    const adapter = {
+      id: runtime.adapter.id,
+      capability: runtime.adapter.capability,
+      prepare: async (...args) => {
+        const prepared = await runtime.adapter.prepare(...args);
+        activeSnapshot = {
+          ...runtime.snapshot,
+          authority: revokeAuthority(runtime.authority, {
+            revoked_at: T1,
+            reason: "Execution authority withdrawn during preparation"
+          })
+        };
+        return prepared;
+      },
+      execute: async (...args) => {
+        executeCalls += 1;
+        return runtime.adapter.execute(...args);
+      },
+      verify: runtime.adapter.verify.bind(runtime.adapter),
+      rollback: runtime.adapter.rollback.bind(runtime.adapter)
+    };
+    const result = await runtime.execute({ adapter, snapshot_provider: async () => activeSnapshot });
+    assert.equal(result.status, "REVOKED");
+    assert.equal(result.action_started, false);
+    assert.equal(executeCalls, 0);
+    assert.equal(await readFile(runtime.target, "utf8"), "before\n");
+  });
+});
+
+test("all eleven public protocol schemas execute on valid and invalid runtime records", async () => {
+  await withRuntime(async (runtime) => {
+    const challenge = runCounterIntentChallenge({ ...runtime.snapshot, now: T1 });
+    const revalidation = revalidateReceipt({
+      receipt: runtime.receipt,
+      receipt_authority: runtime.receipt_authority,
+      ...runtime.snapshot,
+      now: T1
+    });
+    const result = await runtime.execute();
+    const records = [
+      runtime.authority,
+      challenge,
+      runtime.decision,
+      result,
+      runtime.snapshot.intent,
+      result.outcome,
+      runtime.policy,
+      runtime.principal,
+      runtime.receipt,
+      revalidation,
+      result.evidence_seal
+    ];
+    assert.equal(CINT_SCHEMA_PROTOCOLS.length, 11);
+    assert.deepEqual(
+      new Set(records.map((record) => record.protocol)),
+      new Set(CINT_SCHEMA_PROTOCOLS)
+    );
+    for (const record of records) {
+      assert.equal(validateCintSchema(record).valid, true, record.protocol);
+      const { digest, ...unsigned } = record;
+      assert.throws(
+        () => sealRecord({ ...unsigned, schema_forbidden_field: true }),
+        (error) => error.code === "CINT_SCHEMA_INVALID",
+        record.protocol
+      );
+      const invalidUnsigned = { ...unsigned, schema_forbidden_field: true };
+      const forgedInput = { ...invalidUnsigned, digest: canonicalDigest(invalidUnsigned) };
+      assert.equal(validateCintSchema(forgedInput).valid, false, record.protocol);
+      assert.throws(
+        () => verifyProtocolRecord(forgedInput, record.protocol, "forged input"),
+        (error) => error.code === "CINT_SCHEMA_INVALID",
+        record.protocol
+      );
+    }
   });
 });
 

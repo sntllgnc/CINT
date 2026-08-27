@@ -26,13 +26,15 @@ digest. The CINT core independently requires:
    machine-state decision;
 3. signed one-shot receipt;
 4. immediate revalidation and consumption;
-5. a second event-bound revalidation;
-6. legacy execution and adapter outcome verification;
-7. CINT ledger and evidence seal.
+5. a second event-bound revalidation before side-effect-free preparation;
+6. a third execution-bound revalidation after preparation;
+7. legacy execution and adapter outcome verification;
+8. CINT ledger and evidence seal.
 
 The legacy result may be `ADMITTED` or `REJECTED`; both are evidence about the
 delegated review. Neither value grants CINT authority. The wrapper exports no
 decision, receipt, consumption, self-admission, or seal method.
 
 The original CLI remains available only through `agent-floor` or the explicit
-`cint legacy` compatibility command.
+`cint legacy` compatibility command. Importing the CINT core or running
+`cint identity` does not load the adapter or legacy CLI.

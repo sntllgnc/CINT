@@ -18,8 +18,9 @@ request
   -> policy + machine-state challenge
   -> ADMIT / DENY / REVIEW
   -> signed one-shot receipt
-  -> immediate revalidation
-  -> atomic receipt consumption
+  -> locked revalidation + atomic receipt consumption
+  -> fresh snapshot + side-effect-free adapter preparation
+  -> execution-bound revalidation
   -> action adapter
   -> outcome verification
   -> evidence seal or rollback
@@ -33,7 +34,8 @@ absent.
 
 The R0 proof establishes:
 
-- strict canonical objects and JSON schemas;
+- strict canonical objects and runtime enforcement of all 11 public JSON
+  schemas;
 - explicit principal, authority, policy, machine-state, and counter-intent
   contracts;
 - `ADMIT / DENY / REVIEW` decisions with zero executable authority;
@@ -41,7 +43,8 @@ The R0 proof establishes:
   context, authority epoch, policy epoch, adapter, and machine state;
 - file-backed atomic one-shot consumption, replay rejection, expiry, and
   fail-closed crash locks;
-- event-bound revalidation before and after receipt consumption;
+- event-bound revalidation inside consumption, after consumption, and again
+  after preparation immediately before execution;
 - synthetic consequential action, outcome verification, interrupt, rollback,
   hash restoration, execution ledger, and evidence seal;
 - Agent Floor imported as **CINT Adapter 01 — Delegated Coding-Agent
@@ -69,8 +72,8 @@ regression. It is not the CINT product definition.
 ## Repository map
 
 ```text
-src/cint/                         CINT protocols and execution boundary
-src/cint/adapters/                R0 action adapters
+src/cint/                         adapter-independent CINT core and execution boundary
+src/cint/adapters/                explicit, separately imported R0 action adapters
 src/adapters/codex-delegation/    preserved Agent Floor compatibility kernel
 schemas/cint/                     strict authority-bearing JSON schemas
 tests/cint-*.test.js              CINT conformance and end-to-end proofs

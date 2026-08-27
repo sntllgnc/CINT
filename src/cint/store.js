@@ -12,6 +12,7 @@ import {
   parseCanonicalJson,
   sealRecord,
   sha256Digest,
+  verifyProtocolRecord,
   verifySealedRecord
 } from "./canonical.js";
 
@@ -64,7 +65,7 @@ export class FileReceiptStore {
   }
 
   async register(receipt, input) {
-    verifySealedRecord(receipt, "receipt");
+    verifyProtocolRecord(receipt, "cint/decision-receipt/1", "receipt");
     assertCint(
       receipt.protocol === "cint/decision-receipt/1" && receipt.status === "ISSUED",
       "CINT_RECEIPT_PROTOCOL",
@@ -105,7 +106,7 @@ export class FileReceiptStore {
   }
 
   async consume(receipt, input) {
-    verifySealedRecord(receipt, "receipt");
+    verifyProtocolRecord(receipt, "cint/decision-receipt/1", "receipt");
     assertCint(
       receipt.protocol === "cint/decision-receipt/1" && receipt.status === "ISSUED",
       "CINT_RECEIPT_PROTOCOL",

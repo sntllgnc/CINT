@@ -12,14 +12,14 @@ executable only after immediate revalidation and atomic one-shot consumption.
 
 | Plane | Responsibility | Cannot do |
 |---|---|---|
-| Canonical | Strict objects, exact fields, canonical JSON, digests, immutable records | Decide or execute |
+| Canonical | Strict objects, runtime JSON Schema validation, canonical JSON, digests, immutable records | Decide or execute |
 | Intent | Reconstruct request, action, target, context, effects, uncertainties | Grant authority |
 | Principal and authority | Resolve actor, delegation chain, exact grants, epochs, validity, revocation | Execute an action |
 | Policy and challenge | Compare current policy, adapter capability, machine state, and counter-intent | Mint a receipt |
 | Decision | Emit `ADMIT`, `DENY`, or `REVIEW`; bind every current digest | Cross the execution boundary |
 | Receipt authority | Authenticate an eligible `ADMIT` binding and lifetime | Reconstruct or widen the decision |
 | Receipt store | Register, lock, revalidate, consume once, reject replay | Decide policy |
-| Execution gate | Require services, revalidate, consume, revalidate again, invoke exact adapter | Mint or reinterpret authority |
+| Execution gate | Preflight every required service, revalidate, consume, prepare, revalidate immediately before invoking the exact adapter | Mint or reinterpret authority |
 | Outcome and rollback | Verify final state or restore the pre-action state | Seal itself |
 | Ledger and seal | Hash-chain events and authenticate terminal evidence | Authorize another action |
 
@@ -39,11 +39,18 @@ executable only after immediate revalidation and atomic one-shot consumption.
 6. The receipt authority signs only a receipt-eligible `ADMIT` decision.
 7. The store obtains an exclusive receipt lock, invokes immediate revalidation,
    and writes exactly one terminal consumed or rejected record.
-8. The execution gate obtains a fresh snapshot and revalidates again. Drift
-   after consumption still blocks action.
-9. The selected adapter verifies its current target state and performs only the
-   receipt-bound action.
-10. Outcome verification either confirms the intended final digest or invokes
+8. The execution gate obtains a fresh snapshot, revalidates again, and confirms
+   the runtime adapter's exact decision-bound capability before preparation.
+9. The selected adapter performs only side-effect-free preparation. That
+   property is explicit in the signed adapter capability and is required by the
+   decision and execution preflight.
+10. The gate obtains a third fresh snapshot after preparation and revalidates
+    authority, policy, action, target, context, adapter capability, machine
+    state, expiry, and revocation immediately before invoking execution. No
+    asynchronous operation occurs between that check and invocation.
+11. The adapter checks current target state and performs only the receipt-bound
+    action.
+12. Outcome verification either confirms the intended final digest or invokes
     rollback. Only verified or demonstrably restored outcomes can be sealed.
 
 ## Atomicity and failure posture
@@ -53,16 +60,25 @@ terminal records. A concurrent caller, existing terminal record, or ambiguous
 lock is rejected. A crash does not trigger guessed lock recovery. The receipt
 remains unusable until an explicit higher-authority recovery protocol exists.
 
-Execution fails closed when the receipt authority, store, snapshot provider,
-adapter, ledger, or seal authority is unavailable. If failure occurs after a
-synthetic action begins, the gate invokes rollback and verifies the restored
-hash before sealing the restored outcome.
+Execution fails closed before receipt consumption when the receipt verifier,
+store consumer, snapshot provider, adapter preparer/executor/verifier, required
+rollback function, ledger, or seal issuer/verifier is unavailable. If failure
+occurs after a synthetic action begins, the gate invokes rollback and verifies
+the restored hash before sealing the restored outcome.
 
 ## Adapter boundary
 
 Adapters implement preparation, execution, outcome verification, and optional
-rollback. They receive no receipt or seal key. They cannot resolve principals,
-change authority, issue decisions, consume receipts, or seal outcomes.
+rollback. Preparation is contractually side-effect-free and its declaration is
+decision-bound; the final core revalidation detects bound-state drift introduced
+during preparation. Adapters receive no receipt or seal key. They cannot resolve
+principals, change authority, issue decisions, consume receipts, or seal
+outcomes through the adapter interface.
+
+The supported core entrypoint, `src/cint/index.js`, imports no action adapter or
+legacy Agent Floor CLI. Adapters are available only through explicit subpath
+entrypoints. The `cint legacy` command loads Adapter 01 lazily after explicit
+invocation.
 
 The Codex delegation adapter binds the preserved Agent Floor packet and task
 digests, then executes the existing clean, bounded, read-only runner. Its

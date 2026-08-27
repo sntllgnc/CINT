@@ -10,7 +10,7 @@ import {
   isoInstant,
   sealRecord,
   sha256Digest,
-  verifySealedRecord
+  verifyProtocolRecord
 } from "./canonical.js";
 
 function unsignedReceipt(receipt) {
@@ -37,7 +37,7 @@ export class DecisionReceiptAuthority {
 
   issue(input) {
     assertExactKeys(input, ["decision", "issued_at"], ["id", "nonce"], "receipt issuance");
-    verifySealedRecord(input.decision, "decision");
+    verifyProtocolRecord(input.decision, "cint/decision/1", "decision");
     assertCint(
       input.decision.protocol === "cint/decision/1" && input.decision.status === "ADMIT" && input.decision.receipt_eligible,
       "CINT_RECEIPT_DECISION_INELIGIBLE",
@@ -64,7 +64,7 @@ export class DecisionReceiptAuthority {
   }
 
   verify(receipt, options = {}) {
-    verifySealedRecord(receipt, "receipt");
+    verifyProtocolRecord(receipt, "cint/decision-receipt/1", "receipt");
     assertExactKeys(
       receipt,
       [
