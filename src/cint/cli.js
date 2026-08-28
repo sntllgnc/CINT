@@ -7,11 +7,11 @@ export const CINT_IDENTITY = Object.freeze({
   tagline: "No consequential action without current authority.",
   mission: "Prevent silent or unauthorized intent from becoming machine action.",
   invariant: "No consequential action without current decision-bound authority.",
-  release_state: "REMOTE_R0_REVIEW_CANDIDATE",
+  release_state: "PUBLIC_R0_SOURCE",
   public_source_exposure: "YES",
-  public_default_product: "NO",
-  public_release: "NO",
-  remaining_publication_authority: "NONE",
+  public_default_product: "YES",
+  public_release: "YES",
+  remaining_publication_authority: "SOURCE_RELEASE_COMPLETE",
   adapters: Object.freeze([
     "cint.adapter.synthetic-file-patch",
     "cint.adapter.codex-delegation"

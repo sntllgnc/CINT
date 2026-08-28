@@ -3,7 +3,8 @@
 - R0 is a local protocol and proof runtime, not a distributed authorization
   service.
 - Receipt and seal key generation, persistence, rotation, and hardware
-  protection belong to the embedding process.
+  protection belong to the trusted embedding process. R0 also trusts that
+  process to supply a correct execution-time clock.
 - File-backed receipt consumption is atomic on one compatible local filesystem;
   cross-host consensus and network filesystems are not established.
 - Ambiguous locks fail closed. R0 deliberately provides no automatic stale-lock
@@ -28,8 +29,9 @@
 - CINT does not establish account billing, provider quota causation, hostile-code
   containment, operating-system integrity, or protection after receipt/seal key
   compromise.
-- `CINT-R0` carries no push, publication, release, repository rename, package
-  publication, or external announcement authority.
+- `v0.1.0-cint-r0` is a public source prerelease. It does not authorize npm
+  publication, production deployment, third-party operational reliance,
+  machine-wide enforcement, or physical autonomous action.
 
 The AF-G0 accounting case remains a historical Adapter 01 regression. It does
 not define CINT and does not establish a provider bill or quota formula.

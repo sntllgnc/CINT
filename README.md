@@ -2,11 +2,12 @@
 
 **Machine Counterintelligence Runtime**
 
-> No consequential action without current authority.
+> No consequential action without current decision-bound authority.
 
-CINT prevents silent, stale, replayed, or unauthorized intent from becoming
-machine action. It reconstructs the requested intent, resolves the principal
-and authority, challenges current policy and machine state, and emits one of
+CINT prevents silent, stale, altered, replayed, or unauthorized intent from
+becoming consequential machine action. It reconstructs the requested intent,
+resolves the principal and authority, challenges current policy and machine
+state, and emits one of
 `ADMIT`, `DENY`, or `REVIEW`. Only an `ADMIT` decision can receive a signed,
 action-bound, expiring, one-shot receipt. A decision alone carries no executable
 authority.
@@ -28,19 +29,28 @@ request
 
 ## R0 state
 
-`CINT-R0` is an architecture-accepted public review candidate on
-`cint-r0-reassembly`. Its source is publicly exposed through the review branch
-and draft pull request. The default branch remains the legacy Agent Floor
-product, and no merge, public release, package publication, repository rename,
-or external announcement is authorized.
+`CINT-R0` is the public source and verification baseline for the SI1 CINT
+decision-bound action-control architecture.
 
-| Public state | Value |
-|---|---|
-| Source exposure | Yes — review branch and draft pull request |
-| Default product | No — `main` remains legacy Agent Floor |
-| Release | No |
+The R0 release establishes a local, event-bound execution protocol with
+runtime-schema enforcement, decision-bound one-shot receipts, trusted-time
+revalidation immediately before consequential execution, outcome verification,
+rollback, and evidence sealing.
 
-Remote review is enforced by a pinned GitHub Actions matrix covering the
+It is not a production authorization service, operating-system enforcement
+layer, distributed consensus service, hostile-adapter sandbox, or physical
+autonomous-system controller.
+
+Repository:
+https://github.com/sntllgnc/CINT
+
+Release:
+v0.1.0-cint-r0
+
+Remote verification:
+CINT-R0 remote verification
+
+Remote verification is enforced by a pinned GitHub Actions matrix covering the
 declared Node.js 20 compatibility boundary, Node.js 24 LTS, current Node.js 26,
 and Linux, macOS, and Windows. The stable aggregate gate is
 `CINT-R0 remote verification`.
@@ -90,7 +100,7 @@ src/cint/adapters/                explicit, separately imported R0 action adapte
 src/adapters/codex-delegation/    preserved Agent Floor compatibility kernel
 schemas/cint/                     strict authority-bearing JSON schemas
 tests/cint-*.test.js              CINT conformance and end-to-end proofs
-docs/cint-r0/                     gate evidence and local review packet
+docs/cint-r0/                     gate evidence and public R0 release notes
 docs/archive/                     historical Agent Floor and competition material
 artifacts/cint-r0/                gate ledger and sanitized gate receipts
 ```
@@ -104,7 +114,8 @@ artifacts/cint-r0/                gate ledger and sanitized gate receipts
 - [Limitations](docs/LIMITATIONS.md)
 - [Codex Adapter 01](docs/CODEX-ADAPTER.md)
 - [CINT-R0 gate ledger](artifacts/cint-r0/gate-ledger.json)
-- [Local release-candidate state](docs/RELEASE.md)
+- [Public R0 source release](docs/RELEASE.md)
+- [Public release notes](docs/cint-r0/PUBLIC-RELEASE-NOTES.md)
 
 The immutable Agent Floor baseline remains the tagged release
 `v0.1.0-af-g0`. Its narrative, evaluation material, media, fixtures, protocols,

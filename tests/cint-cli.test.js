@@ -9,11 +9,11 @@ test("CINT CLI reports public review exposure without default-product or release
   const identity = JSON.parse(output);
   assert.deepEqual(identity, CINT_IDENTITY);
   assert.equal(identity.public_display, "SI1 CINT");
-  assert.equal(identity.release_state, "REMOTE_R0_REVIEW_CANDIDATE");
+  assert.equal(identity.release_state, "PUBLIC_R0_SOURCE");
   assert.equal(identity.public_source_exposure, "YES");
-  assert.equal(identity.public_default_product, "NO");
-  assert.equal(identity.public_release, "NO");
-  assert.equal(identity.remaining_publication_authority, "NONE");
+  assert.equal(identity.public_default_product, "YES");
+  assert.equal(identity.public_release, "YES");
+  assert.equal(identity.remaining_publication_authority, "SOURCE_RELEASE_COMPLETE");
 });
 
 test("CINT CLI keeps legacy execution behind an explicit command", () => {

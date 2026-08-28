@@ -2,8 +2,9 @@
 
 ## Supported line
 
-Security corrections for the local CINT-R0 candidate are developed on the
-successor branch. The immutable Agent Floor release remains historical evidence.
+Security corrections for the public CINT-R0 source prerelease are developed
+through protected changes to `main`. The immutable Agent Floor release remains
+historical evidence.
 
 ## Report a vulnerability
 

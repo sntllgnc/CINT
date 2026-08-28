@@ -1,9 +1,17 @@
 {
-  "name": "si1-cint",
+  "name": "@sntllgnc/cint",
   "version": "0.1.0-cint-r0",
-  "description": "Machine Counterintelligence Runtime for decision-bound consequential action.",
+  "description": "SI1 CINT — Machine Counterintelligence Runtime for decision-bound consequential action.",
   "type": "module",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sntllgnc/CINT.git"
+  },
+  "homepage": "https://github.com/sntllgnc/CINT#readme",
+  "bugs": {
+    "url": "https://github.com/sntllgnc/CINT/issues"
+  },
   "bin": {
     "cint": "./bin/cint.js",
     "agent-floor": "./bin/agent-floor.js"

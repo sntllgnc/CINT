@@ -1,36 +1,23 @@
 # Changelog
 
-## CINT-R0 — remote review gate
+## v0.1.0-cint-r0 — 2026-08-28
 
-- Published the architecture-accepted candidate as the public
-  `cint-r0-reassembly` review branch and draft pull request.
-- Added pinned, read-only GitHub Actions verification for Node.js 20, 24, and 26
-  on Linux, macOS, and Windows.
-- Added a mechanical 13-schema registry and package-surface check.
-- Made immutable AF-G0 tag verification and the legacy adapter test harness
-  reproducible across Linux, macOS, and Windows.
-- Corrected active terminology: public source exposure is yes; public default
-  product and public release remain no.
-- Preserved the ten architecture commits without squash, rebase, merge, release,
-  package publication, or repository rename.
-
-## CINT-R0 — local review candidate
-
-- Reassembled the active product as SI1 CINT, Machine Counterintelligence
-  Runtime.
-- Added canonical intent, principal, authority, policy, challenge, decision,
-  machine-state, receipt, revalidation, outcome, rollback, ledger, and seal
-  protocols.
-- Added signed action-bound receipts with atomic one-shot consumption, replay
-  rejection, expiry, revocation, and fail-closed locks.
-- Added the disposable synthetic action proof with immediate revalidation,
-  exact outcome verification, interrupt, rollback, and hash restoration.
-- Isolated Agent Floor as CINT Adapter 01 while preserving historical APIs,
-  protocols, tests, fixtures, and evidence.
-- Archived competition and historical Agent Floor narrative outside the active
-  product documentation.
-- Kept the candidate local with no push, publication, release, package
-  publication, repository rename, or external announcement.
+- Made SI1 CINT and `sntllgnc/CINT` the active repository and default-source
+  identity.
+- Closed architecture findings F1-F5 at accepted architecture commit
+  `1343b88e1b95c8e299a8bfa7d3b0786d8347c8c4`.
+- Closed `CINT-EXPIRY-001` through trusted execution-time revalidation at
+  `ae3502779c97ae44464714fea25e1868d5ecaa1d`.
+- Passed 72/72 automated tests before the publication-state commit and in final
+  publication verification.
+- Enforced all 13/13 public runtime schemas and preserved AF-G0 evidence at
+  53/53.
+- Passed remote verification on Linux, macOS, and Windows across Node.js 20, 24,
+  and 26.
+- Preserved Agent Floor as CINT Adapter 01 and the historical
+  `v0.1.0-af-g0` release lineage.
+- Published the source as a GitHub prerelease without npm publication or a
+  production-readiness claim.
 
 ## v0.1.0-af-g0 — 2026-07-18
 

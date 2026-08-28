@@ -1,9 +1,9 @@
-# Independent CINT-R0 remote evaluation
+# Independent SI1 CINT R0 verification
 
-Review draft pull request #1 from `cint-r0-reassembly` into the unchanged legacy
+Verify the public source and verification baseline at `sntllgnc/CINT` on
 `main`. The accepted architecture commit is
-`1343b88e1b95c8e299a8bfa7d3b0786d8347c8c4`. Do not merge, release, rename the
-repository, publish a package, or operate unrelated external services.
+`1343b88e1b95c8e299a8bfa7d3b0786d8347c8c4`, and the trusted execution-time
+correction is `ae3502779c97ae44464714fea25e1868d5ecaa1d`.
 
 ```sh
 npm ci
@@ -19,9 +19,9 @@ Require all of the following:
 - all 13 runtime schemas are registered and present in the package dry run;
 - the historical AF-G0 demo remains reproducible;
 - dependency, publication, and immutable historical evidence checks pass;
-- `cint:identity` reports `REMOTE_R0_REVIEW_CANDIDATE`, public source exposure
-  `YES`, public default product `NO`, public release `NO`, and remaining
-  publication authority `NONE`;
+- `cint:identity` reports `PUBLIC_R0_SOURCE`, public source exposure `YES`, public
+  default product `YES`, public release `YES`, and remaining publication authority
+  `SOURCE_RELEASE_COMPLETE`;
 - `artifacts/cint-r0/gate-ledger.json` contains one ordered pass per completed
   gate;
 - Git status is clean after verification;
@@ -30,4 +30,4 @@ Require all of the following:
 
 Review the proof matrix in `docs/cint-r0/05_SYNTHETIC_ACTION_PROOF.md`, the
 adapter boundary in `docs/cint-r0/06_CODEX_ADAPTER.md`, and the active threat
-model before accepting the local candidate for operator review.
+model when evaluating the public R0 source baseline.
