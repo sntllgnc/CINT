@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.2.0-cint-r1 — unreleased candidate
+
+- Adopted Node.js 24 as the normative baseline, retained Node.js 22 as a
+  temporary compatibility lane, and added Node.js 26 as a forward-compatibility
+  lane. Node.js 20 is historical only.
+- Migrated the CINT control-plane production source and CLI to strict
+  TypeScript while preserving the legacy Agent Floor JavaScript adapter.
+- Preserved all 13 JSON Schemas, R0 protocols, error codes, canonical digests,
+  HMAC vectors, trusted-time checks, one-shot semantics, rollback, and AF-G0
+  behavior.
+- Added branded authority contracts, exhaustive state unions, compile-time
+  negative cases, escape-hatch and import-boundary scans, portable builds,
+  declarations, and package-export verification.
+- Passed 18 deterministic behavioral-equivalence scenarios against
+  `v0.1.0-cint-r0` with no normalized behavioral drift.
+- Added no Rust, WASM, Three.js, browser, web-framework, UI, runtime TypeScript,
+  or publication dependency.
+- Kept package version `0.1.0-cint-r0`, package state private, and all release,
+  tag, merge, npm-publication, and deployment actions outside this candidate.
+
 ## v0.1.0-cint-r0 — 2026-08-28
 
 - Made SI1 CINT and `sntllgnc/CINT` the active repository and default-source

@@ -1,8 +1,17 @@
 # CINT security model
 
+## Type-system boundary
+
+R1 uses strict TypeScript to expose nominal identities, authority states, and
+adapter transitions at compile time. TypeScript types are erased and are never
+accepted as runtime proof. Untrusted inputs remain `unknown` until exact-key,
+JSON Schema/AJV, canonical-record, digest, protocol, and signature checks have
+completed. The 13 unchanged JSON Schemas remain the runtime admission
+authority.
+
 ## Security properties
 
-CINT-R0 enforces these properties for its implemented local adapters:
+CINT enforces these properties for its implemented local adapters:
 
 - explicit intent precedes authority evaluation;
 - principal, authority, policy, adapter, target, action, context, and machine
@@ -24,23 +33,23 @@ CINT-R0 enforces these properties for its implemented local adapters:
 
 | Boundary | Enforcing component |
 |---|---|
-| Strict JSON, runtime schemas, and record integrity | `src/cint/schema.js` and `src/cint/canonical.js` |
-| Exact action scope and time-bound authority | `src/cint/authority.js` |
-| Silent request and counter-intent challenge | `src/cint/challenge.js` |
-| Zero-authority decision | `src/cint/decision.js` |
-| Receipt authentication and lifetime | `src/cint/receipt.js` |
-| One-shot state and replay rejection | `src/cint/store.js` |
-| Current binding checks | `src/cint/revalidation.js` |
-| Fail-closed action boundary | `src/cint/execution.js` |
-| Verified/restored terminal outcome | `src/cint/outcome.js` and `src/cint/rollback.js` |
-| Hash-chained evidence and terminal authentication | `src/cint/evidence.js` and `src/cint/seal.js` |
+| Strict JSON, runtime schemas, and record integrity | `src/cint/schema.ts` and `src/cint/canonical.ts` |
+| Exact action scope and time-bound authority | `src/cint/authority.ts` |
+| Silent request and counter-intent challenge | `src/cint/challenge.ts` |
+| Zero-authority decision | `src/cint/decision.ts` |
+| Receipt authentication and lifetime | `src/cint/receipt.ts` |
+| One-shot state and replay rejection | `src/cint/store.ts` |
+| Current binding checks | `src/cint/revalidation.ts` |
+| Fail-closed action boundary | `src/cint/execution.ts` |
+| Verified/restored terminal outcome | `src/cint/outcome.ts` and `src/cint/rollback.ts` |
+| Hash-chained evidence and terminal authentication | `src/cint/evidence.ts` and `src/cint/seal.ts` |
 
 ## Key custody
 
 Receipt and seal authorities accept caller-supplied key material of at least 32
 bytes and retain it in private class fields. Keys do not enter canonical records,
 ledger payloads, adapter configuration digests, output artifacts, or errors.
-R0 does not persist or distribute keys; the embedding runtime owns generation,
+CINT does not persist or distribute keys; the embedding runtime owns generation,
 storage, rotation, and process isolation.
 
 ## Adapter containment
@@ -70,3 +79,7 @@ The publication audit continues to reject local absolute paths, raw logs,
 credential formats, email addresses, session identifiers, hidden metadata, and
 private project names. The exact public product phrase `SI1 CINT` is the sole
 new identity exception.
+
+This source candidate establishes local protocol behavior only. It does not
+claim production readiness, machine-wide enforcement, or hostile-adapter
+containment.

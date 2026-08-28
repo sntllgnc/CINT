@@ -1,0 +1,106 @@
+{
+  "protocol": "cint-r1/behavioral-equivalence/1",
+  "baseline_release": "v0.1.0-cint-r0",
+  "baseline_commit": "acc857b5d6fadd363816ad9dbf2fdc710a35ba15",
+  "candidate_branch": "cint-r1-typescript",
+  "candidate_preseal_head": "026e0b8719d061df1becafd005d5b1c8dc75b4b5",
+  "normalization": {
+    "excluded": [
+      "generated UUIDs",
+      "temporary absolute paths",
+      "runtime-generated timestamps"
+    ],
+    "retained": [
+      "statuses",
+      "error codes",
+      "canonical digests",
+      "HMAC signature",
+      "store states",
+      "target hashes",
+      "AF-G0 counters"
+    ]
+  },
+  "scenario_count": 18,
+  "passed": 18,
+  "failed": 0,
+  "scenarios": [
+    {
+      "id": "ADMIT",
+      "normalized_sha256": "29b71839b32817a567922ee25329013f6d02faee4ab44e117d67546ba5cf4ab6"
+    },
+    {
+      "id": "DENY",
+      "normalized_sha256": "27bdd775d96a430c1d34223b6701c3bd7ab154b99f860fa986b9460a4acfb444"
+    },
+    {
+      "id": "REVIEW",
+      "normalized_sha256": "ce3ef7d283d69a9ab7293055a4d10f90fa8ab97e65a94226d10b35b52c2a8c9e"
+    },
+    {
+      "id": "RECEIPT_ISSUE_AND_VERIFICATION",
+      "normalized_sha256": "7e3a957bde2341e01a0c8622f02516da5c77320bfb006fb12f04d56b8a43d64f"
+    },
+    {
+      "id": "ONE_SHOT_CONSUMPTION_RACE",
+      "normalized_sha256": "660cd04e3156c21f7be552635e09c88e8bcff31cacfcd82a560b678477b326a7"
+    },
+    {
+      "id": "REPLAY_REJECTION",
+      "normalized_sha256": "e29cd66b63ccd882f10ac350e2a2e16691f0b70ca883dae9ebb31a0011d1ca87"
+    },
+    {
+      "id": "EXPIRY_DURING_PREPARATION",
+      "normalized_sha256": "abd3497076357f9c9f5688e55c47bdf37029030715c059d0eb492b951c7da67f"
+    },
+    {
+      "id": "POLICY_DRIFT",
+      "normalized_sha256": "b6d7d36693901f1999618f2999ee5b64a8d640f9c5f7371ce9469b1deef70898"
+    },
+    {
+      "id": "AUTHORITY_DRIFT",
+      "normalized_sha256": "96e4a1abb244eed410855f60aa1378a36b2c15e8e215e3c862a2b4ca4a0c97f2"
+    },
+    {
+      "id": "MACHINE_STATE_DRIFT",
+      "normalized_sha256": "a3da547603cc74454f9b829c844ea218364c948c11801db8d30d0bc9cc584207"
+    },
+    {
+      "id": "ADAPTER_CAPABILITY_DRIFT",
+      "normalized_sha256": "29570fce9a942018db6417b34367feeca71bac1444d9a837eaa9c0f5e253a861"
+    },
+    {
+      "id": "ALIEN_PROTOCOL_REJECTION",
+      "normalized_sha256": "2c707f6c4f0138bf43cace7f069a3917b9df221e330008f3a3b0f9d1bcfe938a"
+    },
+    {
+      "id": "FORBIDDEN_FIELD_REJECTION",
+      "normalized_sha256": "cd7eb0a2d83159cdd2642683368aa317be9201bf318df556dd5ac76b294d23a7"
+    },
+    {
+      "id": "OUTCOME_VERIFICATION",
+      "normalized_sha256": "8b0737e980795f7fc934b460817ece522dae5e3aca7d0b09deefd91e4e9a3180"
+    },
+    {
+      "id": "ROLLBACK_AND_RESTORED_HASH",
+      "normalized_sha256": "b1fd54774d7a38d9eab5f1af50f9e14fb0522926456afc060120346daed38d49"
+    },
+    {
+      "id": "FAIL_CLOSED_DEPENDENCY_CHECKS",
+      "normalized_sha256": "3319667da83ddc9768ec40fae5be87d0fccad965b9e84a60adc7b396abab5b14"
+    },
+    {
+      "id": "ADAPTER_01_EVIDENCE_ADMISSION",
+      "normalized_sha256": "87dcb291297178aa1571339208e711d5bb1b4005ae0c49c87784a6a0177083df"
+    },
+    {
+      "id": "AF_G0_TELEMETRY_REGRESSION",
+      "normalized_sha256": "dbd3e6664d7aa97f6f80b3748ddc4464c5d6012614cc2a388f4ba698c1d60ca8"
+    }
+  ],
+  "frozen_surfaces": {
+    "runtime_schema_files_identical": "13/13",
+    "protocol_identifier_set": "24/24 identical",
+    "error_code_set": "103/103 identical"
+  },
+  "verdict": "PASS"
+}

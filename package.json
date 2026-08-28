@@ -13,32 +13,64 @@
     "url": "https://github.com/sntllgnc/CINT/issues"
   },
   "bin": {
-    "cint": "./bin/cint.js",
-    "agent-floor": "./bin/agent-floor.js"
+    "cint": "./dist/bin/cint.js",
+    "agent-floor": "./dist/bin/agent-floor.js"
   },
+  "types": "./dist/src/cint/index.d.ts",
   "exports": {
-    ".": "./src/cint/index.js",
-    "./cli": "./src/cint/cli.js",
-    "./adapters/synthetic-file-patch": "./src/cint/adapters/synthetic-file-patch.js",
-    "./adapters/codex-delegation": "./src/cint/adapters/codex/index.js"
+    ".": {
+      "types": "./dist/src/cint/index.d.ts",
+      "import": "./dist/src/cint/index.js"
+    },
+    "./cli": {
+      "types": "./dist/src/cint/cli.d.ts",
+      "import": "./dist/src/cint/cli.js"
+    },
+    "./adapters/synthetic-file-patch": {
+      "types": "./dist/src/cint/adapters/synthetic-file-patch.d.ts",
+      "import": "./dist/src/cint/adapters/synthetic-file-patch.js"
+    },
+    "./adapters/codex-delegation": {
+      "types": "./dist/src/cint/adapters/codex/index.d.ts",
+      "import": "./dist/src/cint/adapters/codex/index.js"
+    }
   },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
-    "cint:identity": "node ./bin/cint.js identity",
-    "cint:test": "node --test ./tests/cint-*.test.js",
+    "build": "node ./scripts/build.mjs",
+    "cint:identity": "node ./scripts/run-built-cint.mjs identity",
+    "cint:test": "npm run test:cint",
+    "clean": "node ./scripts/clean.mjs",
     "demo": "node ./bin/agent-floor.js demo",
     "doctor": "node ./bin/agent-floor.js doctor",
-    "test": "node --test",
+    "pack:verify": "node --test ./tests/npm-pack-launch.test.mjs && node ./scripts/verify-package.mjs",
+    "scan:escapes": "node ./scripts/scan-typescript-escape-hatches.mjs",
+    "scan:boundaries": "node ./scripts/verify-cint-import-boundaries.mjs",
+    "test": "node ./scripts/test.mjs all",
+    "test:cint": "node ./scripts/test.mjs cint",
+    "test:legacy": "node ./scripts/test.mjs legacy",
+    "test:types": "npm run typecheck",
+    "typecheck": "tsc --project tsconfig.test.json",
+    "runtime:verify": "node ./scripts/verify-runtime-support.mjs",
     "schema:verify": "node ./scripts/verify-cint-schema-package.mjs",
     "public:audit": "node ./scripts/publication-audit.mjs",
     "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs",
-    "verify": "npm test && npm run demo && npm audit && npm run public:audit && npm run evidence:verify"
+    "verify": "node ./scripts/verify.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^22.0.0 || ^24.0.0 || ^26.0.0"
   },
   "license": "Apache-2.0",
   "dependencies": {
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.4.0",
+    "typescript": "7.0.2"
   }
 }

@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": [
+    "src/cint/**/*.ts",
+    "bin/cint.ts",
+    "tests/cint-legacy-test-boundary.ts",
+    "tests/cint-test-support.ts",
+    "tests/cint-*.test.ts",
+    "tests/types/**/*.ts"
+  ]
+}

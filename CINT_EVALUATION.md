@@ -25,8 +25,9 @@ Require all of the following:
 - `artifacts/cint-r0/gate-ledger.json` contains one ordered pass per completed
   gate;
 - Git status is clean after verification;
-- the `CINT-R0 remote verification` check passes for Node.js 20, 24, and 26 on
-  Linux, macOS, and Windows.
+- the `CINT-R0 remote verification` and `CINT-R1 TypeScript verification`
+  checks pass over the same Node.js 22, 24, and 26 matrix on Linux, macOS, and
+  Windows.
 
 Review the proof matrix in `docs/cint-r0/05_SYNTHETIC_ACTION_PROOF.md`, the
 adapter boundary in `docs/cint-r0/06_CODEX_ADAPTER.md`, and the active threat
