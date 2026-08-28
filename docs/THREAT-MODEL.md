@@ -128,7 +128,7 @@ flowchart LR
 
 | Priority | Scenario and capability gain | Prerequisites | Impact | Existing controls | Mitigation | Evidence |
 |---|---|---|---|---|---|---|
-| P0 | Forge or alter a receipt to execute a different action | Attacker obtains a valid receipt but not the key | Unauthorized action or target | Record digest, exact binding digest, HMAC, issuer, status, and expiry checks | Keep keys outside adapters; rotate on suspected exposure | `src/cint/receipt.ts`; forgery test in `tests/cint-receipt.test.js` |
+| P0 | Forge or alter a receipt to execute a different action | Attacker obtains a valid receipt but not the key | Unauthorized action or target | Record digest, exact binding digest, HMAC, issuer, status, and expiry checks | Keep keys outside adapters; rotate on suspected exposure | `src/cint/receipt.ts`; forgery test in `tests/cint-receipt.test.ts` |
 | P0 | Replay one receipt concurrently or after success | Copy of an issued receipt | Duplicate consequential action | Hashed identifier, exclusive lock, consumed/rejected terminal record | Protect store permissions; preserve terminal records through retention window | `src/cint/store.ts`; parallel replay tests |
 | P0 | Change action, target, policy, authority, adapter, or machine state after decision | Local mutation between decision and execution | Stale authority becomes action | Revalidation inside the receipt lock, before preparation, and after preparation immediately before execution | Embed policy and state providers with authoritative current snapshots | `src/cint/revalidation.ts`, `src/cint/execution.ts`; preparation-drift regressions |
 | P0 | Mutate synthetic target after receipt consumption | Local writer can change the disposable file | Wrong bytes overwritten | Expected pre-action hash checked during prepare and immediately before atomic write | Use exclusive target ownership where stronger serialization is required | `src/cint/adapters/synthetic-file-patch.ts` |
@@ -162,5 +162,6 @@ exposure, durable target impact, and cross-principal authority gain. It falls
 when the effect is restricted to caller-owned disposable state, an independent
 control blocks execution, or the scenario requires an already fully compromised
 trusted host. Confidence depends on verified deployment and key/storage custody;
-R1 candidate tests establish local protocol behavior, not every future
-embedding, production readiness, or machine-wide enforcement.
+the R1 tests integrated into `main` establish local protocol behavior, not an R1
+release, every future embedding, production readiness, or machine-wide
+enforcement.

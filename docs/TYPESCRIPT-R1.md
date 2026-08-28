@@ -1,11 +1,13 @@
 # CINT R1 strict TypeScript boundary
 
-## Candidate status
+## Integrated source status
 
-R1 migrates the CINT control plane from JavaScript source to strict TypeScript
+R1 migrated the CINT control plane from JavaScript source to strict TypeScript
 source without changing the R0 wire protocols, error codes, canonical bytes,
-receipt signatures, execution ordering, or schemas. The package remains private
-and versioned `0.1.0-cint-r0` until separate release authority exists.
+receipt signatures, execution ordering, or schemas. PR #2 integrated that
+source into `main` through merge commit `993ba4ce852eb43a36b2fe4395cdfed33756a7de`.
+The package remains private and versioned `0.1.0-cint-r0` until separate release
+authority exists.
 
 The exact development toolchain is:
 
@@ -16,15 +18,18 @@ typescript   7.0.2
 
 Neither package is a runtime dependency.
 
-At C2 acceptance on 2026-08-28, the verified implementation candidate was
+At the earlier C2 acceptance gate on 2026-08-28, the verified implementation
+candidate was
 `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022` on `cint-r1-typescript`. It preserved
 the C1 parent `42465b0192d167f419e782674fd4675c4049e4d9` and established the
 terminal state `READY-FOR-CINT-R1-TYPESCRIPT-REVIEW`. PR #2 was open and draft
 at C2 acceptance; that was a reviewable branch state, not a merge or release
 state.
 
-Live head, workflow, and review-readiness state are maintained on
-[PR #2](https://github.com/sntllgnc/CINT/pull/2) and its GitHub checks.
+The historical snapshot does not describe the current lifecycle state. PR #2
+is merged, and post-merge run
+[33179382085](https://github.com/sntllgnc/CINT/actions/runs/33179382085)
+passed all nine lanes and both aggregates at the exact main merge commit.
 
 ## Compiler policy
 
@@ -43,9 +48,24 @@ authority substitutions fail compilation.
 
 All six `cint-*.test.ts` suites are included in strict typechecking, compiled
 into ignored `.test-dist/` JavaScript, and executed by both `test:cint` and the
-complete test path. The candidate contains 29 TypeScript and zero JavaScript
-production files under `src/cint/`, and six TypeScript and zero JavaScript CINT
-test suites.
+complete test path. The integrated source contains 29 TypeScript and zero
+JavaScript production files under `src/cint/`, and six TypeScript and zero
+JavaScript CINT test suites.
+
+## Repository language boundary
+
+At main integration, GitHub detected 226,240 TypeScript bytes (59.6%) and
+153,506 JavaScript bytes (40.4%). This is expected: Linguist counts the complete
+maintained repository rather than only `src/cint/**`.
+
+The JavaScript share is owned by the preserved Agent Floor Adapter 01, root
+compatibility modules, `bin/agent-floor.js`, build and verification scripts,
+legacy tests, the package-launch regression, and a sanitized fixture. It is not
+JavaScript inside the migrated CINT control plane. No `.gitattributes` override
+hides or reclassifies that maintained source.
+
+See [`LANGUAGE-BOUNDARY.md`](LANGUAGE-BOUNDARY.md) for the source-ownership and
+trust-boundary map.
 
 ## Mechanical distinctions
 

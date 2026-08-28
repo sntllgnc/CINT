@@ -80,6 +80,10 @@ credential formats, email addresses, session identifiers, hidden metadata, and
 private project names. The exact public product phrase `SI1 CINT` is the sole
 new identity exception.
 
-This source candidate establishes local protocol behavior only. It does not
-claim production readiness, machine-wide enforcement, or hostile-adapter
-containment.
+The R1 source integrated into `main` establishes local protocol behavior only.
+It does not create an R1 package release or claim production readiness,
+machine-wide enforcement, or hostile-adapter containment. Repository language
+composition does not change this boundary: the 29-file CINT control plane is
+strict TypeScript, while preserved JavaScript adapter and tooling surfaces have
+separate documented ownership in
+[`LANGUAGE-BOUNDARY.md`](LANGUAGE-BOUNDARY.md).

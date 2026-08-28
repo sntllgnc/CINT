@@ -30,8 +30,23 @@ The C2 package-launch correction is process portability inside the existing
 Node.js verification plane. It introduces no framework, UI, browser, Rust,
 WASM, or deployment surface and changes no CINT runtime-authority path.
 
+## Language boundary is not framework drift
+
+The R1 control plane integrated into `main` contains 29 TypeScript and zero
+JavaScript source files under `src/cint/**`. GitHub's repository-wide language
+bar still includes maintained JavaScript in Adapter 01, compatibility modules,
+build and verification scripts, legacy tests, and fixtures. That JavaScript is
+an explicit ownership boundary, not a hidden framework or an incomplete CINT
+core migration.
+
+CINT does not suppress that source with a Linguist override. Migrating the
+adapter or tooling would be a separate compatibility project with its own
+behavioral proof; it is not required to establish the R1 runtime boundary.
+The complete inventory is in
+[`LANGUAGE-BOUNDARY.md`](LANGUAGE-BOUNDARY.md).
+
 ## Non-claims
 
-The R1 candidate does not establish production readiness, machine-wide
-enforcement, hostile-adapter sandboxing, web-product status, deployment
-authority, or external-service activation.
+The integrated R1 source state does not establish an R1 package release,
+production readiness, machine-wide enforcement, hostile-adapter sandboxing,
+web-product status, deployment authority, or external-service activation.

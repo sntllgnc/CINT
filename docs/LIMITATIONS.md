@@ -42,6 +42,16 @@
   expected package inventory, export/declaration resolution, and source-map
   hygiene. It is not an npm publication, clean-install guarantee, deployment
   proof, signature-transparency proof, or production-readiness claim.
+- GitHub's language bar measures detected bytes across the complete maintained
+  repository. The 59.6% TypeScript / 40.4% JavaScript snapshot is not an
+  authority, trust, coverage, or migration-completeness metric. The CINT
+  control plane under `src/cint/**` contains 29 TypeScript and zero JavaScript
+  source files; the remaining JavaScript belongs to documented adapter,
+  compatibility, tooling, test, and fixture surfaces.
+- PR #2 integrating the R1 TypeScript source into `main` does not itself create
+  an R1 release. The package remains private and versioned `0.1.0-cint-r0`;
+  tags, GitHub releases, npm publication, and deployment require separate
+  authority.
 - R1 contains no Rust, WASM, Three.js, browser, WebGL, web-server, or UI trusted
   runtime. An isolated Rust core and any visualization surface require separate
   future authority; neither is implied by this migration.

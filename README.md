@@ -27,20 +27,31 @@ request
   -> evidence seal or rollback
 ```
 
-## R1 candidate state
+## R1 integrated source state
 
-The `cint-r1-typescript` branch is a review candidate that migrates the CINT
-control plane to strict TypeScript while preserving the R0 runtime contract.
+On 2026-08-28, [PR #2](https://github.com/sntllgnc/CINT/pull/2) merged the
+strict TypeScript control plane into `main` through merge commit
+`993ba4ce852eb43a36b2fe4395cdfed33756a7de`. The merge preserved the accepted
+R0 runtime contracts and the complete R1 correction lineage. The post-merge
+[main verification](https://github.com/sntllgnc/CINT/actions/runs/33179382085)
+passed all nine Linux, macOS, and Windows lanes on Node.js 22, 24, and 26 plus
+both aggregate checks.
+
+`main` is therefore the integrated R1 source state. This is not an R1 release:
+the package remains private and versioned `0.1.0-cint-r0`; no R1 tag, GitHub
+release, npm publication, production deployment, or machine-wide enforcement
+claim exists.
+
 TypeScript makes authority-state and adapter-boundary distinctions visible to
 the compiler; it does not become runtime authority. All untrusted records still
 enter as `unknown` and must pass the unchanged JSON Schema/AJV, exact-key,
 canonical-byte, digest, HMAC, revalidation, one-shot, trusted-time, outcome,
 and seal controls.
 
-The package remains private and versioned `0.1.0-cint-r0`. R1 grants no merge,
-tag, release, npm-publication, or production-deployment authority.
+### C2 acceptance snapshot
 
-The following table records the C2 acceptance snapshot from 2026-08-28:
+The following table preserves the package-launch correction state that preceded
+integration:
 
 | Field | Verified value |
 |---|---|
@@ -51,15 +62,32 @@ The following table records the C2 acceptance snapshot from 2026-08-28:
 | Qualifying C2 workflow | [33175315187](https://github.com/sntllgnc/CINT/actions/runs/33175315187); nine lanes plus both aggregates passed |
 | Terminal | `READY-FOR-CINT-R1-TYPESCRIPT-REVIEW` |
 
-Live head, workflow, and review-readiness state are maintained on
-[PR #2](https://github.com/sntllgnc/CINT/pull/2) and its GitHub checks.
-
 The C2 correction changes only package-verification process launch. It prefers
 the active Node executable plus npm's CLI path, uses bounded platform fallbacks
 when that metadata is absent, and treats spawn errors or a missing exit status
 as terminal verification failures. This is build assurance, not CINT execution
 authority: it cannot decide, issue or consume a receipt, invoke an action
 adapter, or seal an outcome.
+
+## Language composition and ownership
+
+GitHub's language bar measures detected source bytes across the entire
+repository. At the R1 main-integration snapshot it reports 226,240 TypeScript
+bytes (59.6%) and 153,506 JavaScript bytes (40.4%). Those percentages describe
+repository composition—not migration completeness, execution authority, or the
+size of the trusted CINT core.
+
+| Surface | Source language | Status |
+|---|---|---|
+| `src/cint/**` | TypeScript: 29 files; JavaScript: 0 files | Integrated CINT control plane |
+| `bin/cint.ts` and six `cint-*.test.ts` suites | TypeScript | CINT CLI and strict conformance tests |
+| `src/adapters/codex-delegation/**`, root compatibility modules, `bin/agent-floor.js` | JavaScript | Preserved Agent Floor Adapter 01 and compatibility surface |
+| `scripts/*.mjs` | JavaScript | Build, verification, packaging, and evidence tooling |
+| Legacy and launcher tests | JavaScript | Historical compatibility and process-launch proofs |
+
+The remaining JavaScript is intentional, maintained, and visible. CINT does not
+use `.gitattributes` to disguise it. Future migration of Adapter 01 or tooling
+requires separate authority and must preserve historical behavior.
 
 ## R0 state
 
@@ -156,7 +184,9 @@ artifacts/cint-r1/                R1 baseline and behavioral-equivalence records
 - [Limitations](docs/LIMITATIONS.md)
 - [Runtime support](docs/RUNTIME-SUPPORT.md)
 - [TypeScript R1 boundary](docs/TYPESCRIPT-R1.md)
+- [Language and ownership boundary](docs/LANGUAGE-BOUNDARY.md)
 - [R1 C2 state, logic, and architecture](docs/cint-r1/10_CORRECTION_C2.md)
+- [R1 main-integration record](docs/cint-r1/11_MAIN_INTEGRATION.md)
 - [Framework boundary](docs/FRAMEWORK-BOUNDARY.md)
 - [Codex Adapter 01](docs/CODEX-ADAPTER.md)
 - [CINT-R0 gate ledger](artifacts/cint-r0/gate-ledger.json)
