@@ -28,13 +28,14 @@
     "demo": "node ./bin/agent-floor.js demo",
     "doctor": "node ./bin/agent-floor.js doctor",
     "test": "node --test",
+    "runtime:verify": "node ./scripts/verify-runtime-support.mjs",
     "schema:verify": "node ./scripts/verify-cint-schema-package.mjs",
     "public:audit": "node ./scripts/publication-audit.mjs",
     "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs",
-    "verify": "npm test && npm run demo && npm audit && npm run public:audit && npm run evidence:verify"
+    "verify": "npm run runtime:verify && npm test && npm run demo && npm audit && npm run public:audit && npm run evidence:verify"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^22.0.0 || ^24.0.0 || ^26.0.0"
   },
   "license": "Apache-2.0",
   "dependencies": {

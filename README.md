@@ -50,10 +50,11 @@ v0.1.0-cint-r0
 Remote verification:
 CINT-R0 remote verification
 
-Remote verification is enforced by a pinned GitHub Actions matrix covering the
-declared Node.js 20 compatibility boundary, Node.js 24 LTS, current Node.js 26,
-and Linux, macOS, and Windows. The stable aggregate gate is
-`CINT-R0 remote verification`.
+Remote verification is enforced by a pinned GitHub Actions matrix covering
+temporary Node.js 22 compatibility, the normative Node.js 24 LTS baseline,
+forward Node.js 26 compatibility, and Linux, macOS, and Windows. The stable
+aggregate gates are `CINT-R0 remote verification` and
+`CINT-R1 TypeScript verification`; both depend on the same complete matrix.
 
 The R0 proof establishes:
 
@@ -81,6 +82,9 @@ The R0 proof establishes:
 | Codex delegation | `CODEX_DELEGATED_REVIEW` | Read-only delegated review | Reports legacy evidence only; cannot decide, issue, consume, admit itself, or seal |
 
 ## Verify locally
+
+Use the latest security-patched Node.js 24 release for normative development.
+Node.js 22 and 26 are tested compatibility lanes, not the development baseline.
 
 ```sh
 npm ci

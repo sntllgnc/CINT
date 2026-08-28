@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ignoredDirectories = new Set([".git", "node_modules"]);
 const ignoredPrefixes = ["artifacts/generated/"];
-const allowedDotfiles = new Set([".gitignore"]);
+const allowedDotfiles = new Set([".gitignore", ".node-version", ".npmrc", ".nvmrc"]);
 const allowedHiddenDirectories = new Set([".github"]);
 const privateNames = ["S" + "I1", "Y" + "I1", "S" + "I6", "F" + "YRE"];
 const authorizedPublicNames = [new RegExp("\\b" + "SI1(?:[ -]CINT)" + "\\b", "gi")];
@@ -42,7 +42,7 @@ async function walk(directory) {
       findings.push({ code: "NON_REGULAR_FILE", path: relative });
       continue;
     }
-    if (entry.name.startsWith(".") && !allowedDotfiles.has(entry.name)) {
+    if (entry.name.startsWith(".") && !allowedDotfiles.has(relative)) {
       findings.push({ code: "HIDDEN_FILE", path: relative });
     }
     if (entry.name.endsWith(".log")) findings.push({ code: "RAW_LOG_FILE", path: relative });

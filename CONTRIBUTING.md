@@ -2,7 +2,9 @@
 
 ## Development setup
 
-SI1 CINT requires Node.js 20 or newer and has no runtime package dependencies.
+SI1 CINT uses the latest security-patched Node.js 24 release as its normative
+development baseline. Node.js 22 is a temporary compatibility lane and Node.js
+26 is a forward-compatibility lane.
 
 ```sh
 npm ci

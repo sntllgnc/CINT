@@ -6,6 +6,10 @@ Security corrections for the public CINT-R0 source prerelease are developed
 through protected changes to `main`. The immutable Agent Floor release remains
 historical evidence.
 
+The active security baseline is the latest security-patched Node.js 24 release.
+Node.js 22 is retained temporarily for compatibility testing, Node.js 26 is a
+forward-compatibility lane, and Node.js 20 is historical and unsupported.
+
 ## Report a vulnerability
 
 Use the repository's private vulnerability reporting channel. Include the
