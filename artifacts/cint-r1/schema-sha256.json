@@ -1,0 +1,21 @@
+{
+  "protocol": "cint-r1/schema-sha256/1",
+  "algorithm": "sha256",
+  "source_commit": "acc857b5d6fadd363816ad9dbf2fdc710a35ba15",
+  "count": 13,
+  "schemas": {
+    "schemas/cint/adapter-capability.schema.json": "8b2ae648726c9e17a4f3f8f5e71884afe3e52aadd81c2fce58d7b1077aace6b2",
+    "schemas/cint/authority.schema.json": "c7d01456cf80960cab8151e203335425f4892272644269333cf4c9d893f983e7",
+    "schemas/cint/challenge.schema.json": "2fb88e17a5e2c3bdbb67fcb1e7b57ea3b0337ca4c352fa1ae269c8fb1c67bd23",
+    "schemas/cint/decision.schema.json": "f32ada548ed0ccf413c91fb9c515e04f748f60fac486582c596504ca9d63a069",
+    "schemas/cint/execution-result.schema.json": "2e600707e9446da76498e90b81f2233ccc0d445f58cf155b697d2e1c5211ae3b",
+    "schemas/cint/intent.schema.json": "7aaea767fd5ea7268a06f66b8f1d31c9079f2ed65b92ff019c1d621c36a0380a",
+    "schemas/cint/machine-state.schema.json": "bafa5f607873e5c619cfd204bf3503cd7f992eee67aebf8bad5c7fb02625b15c",
+    "schemas/cint/outcome.schema.json": "c00d8fa48a6456d0dcfa6c096620d04493a91cc312e3339124652e932344a4c9",
+    "schemas/cint/policy.schema.json": "d3fd4df0e511298891ea2b675ef8e1f50e0eb4625c62807116ace96cc3e7b83f",
+    "schemas/cint/principal.schema.json": "cbf04d18fed155928c5ce1fdbe6b985fc3f9dd66089771d16d3da3d961a479cb",
+    "schemas/cint/receipt.schema.json": "ee8318a2e890c2db4471a289232762120c6b56e3f4b13aafb9f7b064ca9402bd",
+    "schemas/cint/revalidation.schema.json": "a42281c970621b734903c2a8b79bfd7f33cdc8fe708223be2b0985316ed3c72f",
+    "schemas/cint/seal.schema.json": "3c7912c93795da8a36d6539683e602d254ce5369cfd1d18ab2beea0acadaa1fc"
+  }
+}

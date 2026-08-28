@@ -1,0 +1,77 @@
+{
+  "protocol": "cint-r1/r0-baseline/1",
+  "recorded_at": "2026-08-28T11:38:52Z",
+  "task_id": "CINT-R1-TYPESCRIPT-CONTROL-PLANE",
+  "verdict": "PASS-CINT-R1-G0",
+  "c3_receipt": {
+    "filename": "CINT-R0-PUBLIC-CUTOVER-C3.json",
+    "bytes": 8551,
+    "sha256": "de0e948d9650f0b1f1d4d43910950cb4d428991c407244f7386a1679a442fc63",
+    "sidecar_verified": true,
+    "json_valid": true,
+    "r1_precondition": "SATISFIED",
+    "verdict": "CINT-R0-PUBLIC-CUTOVER-PASS"
+  },
+  "repository": {
+    "full_name": "sntllgnc/CINT",
+    "visibility": "public",
+    "default_branch": "main",
+    "origin": "https://github.com/sntllgnc/CINT.git",
+    "base_commit": "acc857b5d6fadd363816ad9dbf2fdc710a35ba15",
+    "base_tree": "e156a3a150152961ff3aa027ceb69b9f97f3c780",
+    "source_worktree_clean": true,
+    "r1_branch": "cint-r1-typescript"
+  },
+  "tags": {
+    "v0.1.0-cint-r0": {
+      "type": "annotated",
+      "commit": "acc857b5d6fadd363816ad9dbf2fdc710a35ba15"
+    },
+    "v0.1.0-af-g0": {
+      "type": "annotated",
+      "commit": "d57a80404e04d2c376cba9cc4b3fc06a5d8c8c49"
+    }
+  },
+  "remote_verification": {
+    "workflow": "CINT R0 verification",
+    "run_id": 33131135677,
+    "head_sha": "acc857b5d6fadd363816ad9dbf2fdc710a35ba15",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "local_r0_verification": {
+    "node": "v25.9.0",
+    "npm": "11.12.1",
+    "dependency_install": "PASS",
+    "tests": {
+      "total": 72,
+      "passed": 72,
+      "failed": 0
+    },
+    "af_g0_demo": "PASS",
+    "af_g0_evidence": {
+      "verified": 53,
+      "total": 53
+    },
+    "schemas": {
+      "verified": 13,
+      "total": 13
+    },
+    "dependency_vulnerabilities": 0,
+    "publication_findings": 0
+  },
+  "non_actions": {
+    "main_merge": 0,
+    "main_direct_update": 0,
+    "push": 0,
+    "tag_creation": 0,
+    "github_release": 0,
+    "npm_publication": 0,
+    "schema_change": 0,
+    "rust_code": 0,
+    "wasm_code": 0,
+    "threejs_code": 0,
+    "web_ui": 0,
+    "production_deployment": 0
+  }
+}
