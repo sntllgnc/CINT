@@ -3,6 +3,7 @@ import { chmod, mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
   DecisionReceiptAuthority,
@@ -15,31 +16,43 @@ import {
   createPolicySnapshot,
   decide,
   executeWithReceipt,
+  isPlainRecord,
+  isoInstant,
   resolvePrincipal
 } from "../src/cint/index.js";
 import {
   CodexDelegationCintAdapter,
   createCodexDelegationAction
 } from "../src/cint/adapters/codex/index.js";
-import { DEMO_SPEC, PROJECT_ROOT } from "../src/demo.js";
-import { loadTaskSpec } from "../src/policy.js";
+import { loadLegacyTaskSpec } from "./cint-legacy-test-boundary.js";
+import {
+  hasErrorCode,
+  parseJsonRecord,
+  property,
+  requireAdmit
+} from "./cint-test-support.js";
 
 const T0 = "2026-08-27T00:00:00.000Z";
 const T1 = "2026-08-27T00:01:00.000Z";
 const T2 = "2026-08-27T00:10:00.000Z";
 const EXPIRY = "2026-08-27T01:00:00.000Z";
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const DEMO_SPEC = path.join(PROJECT_ROOT, "examples", "demo-task.json");
 
-async function withAdapterRuntime(run) {
+async function createAdapterRuntime() {
   const temporary = await mkdtemp(path.join(os.tmpdir(), "cint-codex-adapter-test-"));
   const output = path.join(temporary, "legacy-output");
   const mock = path.join(PROJECT_ROOT, "fixtures", "sanitized-af-g0", "mock-codex.mjs");
   await chmod(mock, 0o755);
-  const { spec: loadedSpec } = await loadTaskSpec(DEMO_SPEC);
+  const loadedSpec = await loadLegacyTaskSpec(PROJECT_ROOT, DEMO_SPEC);
   const spec = {
     ...loadedSpec,
     delegation: { ...loadedSpec.delegation, max_concurrency: 2 }
   };
   const action = await createCodexDelegationAction(spec);
+  assert.ok(isPlainRecord(action.target), "Codex action target must be an object");
+  const packetSha256 = action.target["packet_sha256"];
+  assert.equal(typeof packetSha256, "string", "Codex action target must bind packet_sha256");
   const intent = createIntent({
     id: "intent.codex-adapter.1",
     principal_id: "principal.operator",
@@ -93,7 +106,7 @@ async function withAdapterRuntime(run) {
     id: "machine.codex-adapter",
     epoch: 1,
     available: true,
-    state: { packet_sha256: action.target.packet_sha256, mode: "READY" },
+    state: { packet_sha256: packetSha256, mode: "READY" },
     observed_at: T0
   });
   const snapshot = {
@@ -117,7 +130,7 @@ async function withAdapterRuntime(run) {
   const receipt = receipt_authority.issue({
     id: "receipt.codex-adapter.1",
     nonce: "codex-adapter-receipt-0001",
-    decision,
+    decision: requireAdmit(decision),
     issued_at: T1
   });
   const store = new FileReceiptStore(path.join(temporary, "receipt-store"));
@@ -127,8 +140,8 @@ async function withAdapterRuntime(run) {
     key: Buffer.alloc(32, 29)
   });
   const ledger = new ExecutionLedger(path.join(temporary, "evidence", "execution.jsonl"));
-  try {
-    return await run({
+  return {
+    runtime: {
       temporary,
       output,
       mock,
@@ -143,19 +156,31 @@ async function withAdapterRuntime(run) {
       store,
       seal_authority,
       ledger
-    });
+    },
+    cleanup: () => rm(temporary, { recursive: true, force: true })
+  };
+}
+
+type AdapterRuntime = Awaited<ReturnType<typeof createAdapterRuntime>>["runtime"];
+
+async function withAdapterRuntime<Result>(
+  run: (runtime: AdapterRuntime) => Promise<Result>
+): Promise<Result> {
+  const created = await createAdapterRuntime();
+  try {
+    return await run(created.runtime);
   } finally {
-    await rm(temporary, { recursive: true, force: true });
+    await created.cleanup();
   }
 }
 
 test("Codex Adapter 01 exposes no CINT authority operation", async () => {
   await withAdapterRuntime(async ({ adapter }) => {
     assert.equal(adapter.capability.consequence_classes[0], "READ_ONLY");
-    assert.equal(adapter.decide, undefined);
-    assert.equal(adapter.issue, undefined);
-    assert.equal(adapter.consume, undefined);
-    assert.equal(adapter.seal, undefined);
+    assert.equal(property(adapter, "decide"), undefined);
+    assert.equal(property(adapter, "issue"), undefined);
+    assert.equal(property(adapter, "consume"), undefined);
+    assert.equal(property(adapter, "seal"), undefined);
     assert(Object.values(adapter.authority_boundary).every((value) => value === false));
   });
 });
@@ -177,9 +202,9 @@ test("legacy bounded review runs only under a consumed CINT receipt", async () =
     assert.equal(result.outcome.status, "VERIFIED");
     assert.equal(result.outcome.effect_status, "APPLIED");
     runtime.seal_authority.verify(result.evidence_seal);
-    const legacy = JSON.parse(await readFile(path.join(runtime.output, "run.json"), "utf8"));
-    assert.equal(legacy.admission.result, "ADMITTED");
-    assert.equal(legacy.context_enforcement.inherited_turns, 0);
+    const legacy = parseJsonRecord(await readFile(path.join(runtime.output, "run.json"), "utf8"));
+    assert.equal(property(legacy["admission"], "result"), "ADMITTED");
+    assert.equal(property(legacy["context_enforcement"], "inherited_turns"), 0);
     assert.equal((await runtime.store.inspect(runtime.receipt.id)).state, "CONSUMED");
   });
 });
@@ -193,8 +218,8 @@ test("legacy packet drift is rejected before Codex execution", async () => {
       codex_binary: runtime.mock
     });
     await assert.rejects(
-      changedAdapter.prepare(runtime.intent, { at: T1 }),
-      (error) => error.code === "CINT_CODEX_PACKET_CHANGED"
+      changedAdapter.prepare(runtime.intent, { at: isoInstant(T1) }),
+      (error: unknown) => hasErrorCode(error, "CINT_CODEX_PACKET_CHANGED")
     );
   });
 });

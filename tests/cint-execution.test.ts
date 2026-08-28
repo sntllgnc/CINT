@@ -24,11 +24,21 @@ import {
   revokeAuthority,
   runCounterIntentChallenge,
   sealRecord,
+  sha256,
   validateCintSchema,
   verifyProtocolRecord
 } from "../src/cint/index.js";
 import { SyntheticFilePatchAdapter } from "../src/cint/adapters/synthetic-file-patch.js";
-import { sha256 } from "../src/util.js";
+import type {
+  ExecutionAdapter,
+  ExecutionSnapshot
+} from "../src/cint/execution.js";
+import {
+  executeUntrusted,
+  hasErrorCode,
+  issueUntrusted,
+  requireAdmit
+} from "./cint-test-support.js";
 
 const T0 = "2026-08-27T00:00:00.000Z";
 const T1 = "2026-08-27T00:01:00.000Z";
@@ -36,41 +46,93 @@ const T2_BEFORE = "2026-08-27T00:09:59.999Z";
 const T2 = "2026-08-27T00:10:00.000Z";
 const EXPIRY = "2026-08-27T01:00:00.000Z";
 
-function createTestClock(initial = T1) {
+function createTestClock(initial: string = T1) {
   let current = initial;
   return Object.freeze({
     now: () => current,
-    set: (next) => {
+    set: (next: string) => {
       current = next;
     }
   });
 }
 
-function adapterAdvancingClock(runtime, next, counters = { execute_calls: 0 }) {
+function adapterAdvancingClock(
+  runtime: ExecutionRuntime,
+  next: string,
+  counters: { execute_calls: number } = { execute_calls: 0 }
+): ExecutionAdapter {
+  const adapter: ExecutionAdapter = runtime.adapter;
   return {
-    id: runtime.adapter.id,
-    capability: runtime.adapter.capability,
-    prepare: async (...args) => {
-      const prepared = await runtime.adapter.prepare(...args);
+    id: adapter.id,
+    capability: adapter.capability,
+    prepare: async (intent, options) => {
+      const prepared = await adapter.prepare(intent, options);
       runtime.clock.set(next);
       return prepared;
     },
-    execute: async (...args) => {
+    execute: async (prepared, options) => {
       counters.execute_calls += 1;
-      return runtime.adapter.execute(...args);
+      return adapter.execute(prepared, options);
     },
-    verify: runtime.adapter.verify.bind(runtime.adapter),
-    rollback: runtime.adapter.rollback.bind(runtime.adapter)
+    verify: (prepared, execution, options) => adapter.verify(prepared, execution, options),
+    rollback: async (prepared, options) => {
+      if (adapter.rollback === undefined) throw new Error("test adapter must support rollback");
+      return adapter.rollback(prepared, options);
+    }
   };
 }
 
-function rehashRecord(record, overrides) {
-  const { digest, ...unsigned } = record;
+interface AdapterHooks {
+  readonly capability?: ExecutionAdapter["capability"];
+  readonly afterPrepare?: () => void | Promise<void>;
+  readonly beforeExecute?: () => void | Promise<void>;
+}
+
+function adapterWithHooks(runtime: ExecutionRuntime, hooks: AdapterHooks = {}): ExecutionAdapter {
+  const adapter: ExecutionAdapter = runtime.adapter;
+  return {
+    id: adapter.id,
+    capability: hooks.capability ?? adapter.capability,
+    prepare: async (intent, options) => {
+      const prepared = await adapter.prepare(intent, options);
+      await hooks.afterPrepare?.();
+      return prepared;
+    },
+    execute: async (prepared, options) => {
+      await hooks.beforeExecute?.();
+      return adapter.execute(prepared, options);
+    },
+    verify: (prepared, execution, options) => adapter.verify(prepared, execution, options),
+    rollback: async (prepared, options) => {
+      if (adapter.rollback === undefined) throw new Error("test adapter must support rollback");
+      return adapter.rollback(prepared, options);
+    }
+  };
+}
+
+function rehashRecord(record: object, overrides: Readonly<Record<string, unknown>>) {
+  const unsigned = Object.fromEntries(Object.entries(record).filter(([key]) => key !== "digest"));
   const changed = { ...unsigned, ...overrides };
   return { ...changed, digest: canonicalDigest(changed) };
 }
 
-async function withRuntime(run) {
+interface IntentOverrides {
+  readonly id?: unknown;
+  readonly request?: unknown;
+  readonly action?: unknown;
+  readonly content?: unknown;
+  readonly declared_effects?: unknown;
+  readonly context?: unknown;
+  readonly uncertainties?: unknown;
+}
+
+interface PolicyOverrides {
+  readonly version?: unknown;
+  readonly epoch?: unknown;
+  readonly issued_at?: unknown;
+}
+
+async function createRuntime() {
   const root = await mkdtemp(path.join(os.tmpdir(), "cint-execution-test-"));
   const target = path.join(root, "target.txt");
   const initial = Buffer.from("before\n", "utf8");
@@ -78,7 +140,7 @@ async function withRuntime(run) {
   const targetObject = Object.freeze({ path: "target.txt" });
   const beforeSha256 = sha256(initial);
 
-  const makeIntent = (overrides = {}) =>
+  const makeIntent = (overrides: IntentOverrides = {}) =>
     createIntent({
       id: overrides.id ?? "intent.execution.1",
       principal_id: "principal.operator",
@@ -123,7 +185,7 @@ async function withRuntime(run) {
     not_before: T0,
     expires_at: EXPIRY
   });
-  const makePolicy = (overrides = {}) =>
+  const makePolicy = (overrides: PolicyOverrides = {}) =>
     createPolicySnapshot({
       id: "policy.execution",
       version: overrides.version ?? "r0.1",
@@ -168,7 +230,7 @@ async function withRuntime(run) {
   const receipt = receipt_authority.issue({
     id: "receipt.execution.1",
     nonce: "execution-receipt-nonce-0001",
-    decision,
+    decision: requireAdmit(decision),
     issued_at: T1
   });
   const store = new FileReceiptStore(path.join(root, "receipt-store"));
@@ -201,8 +263,8 @@ async function withRuntime(run) {
     seal_authority,
     ledger,
     clock,
-    execute: (overrides = {}) =>
-      executeWithReceipt({
+    execute: (overrides: Readonly<Record<string, unknown>> = {}) =>
+      executeUntrusted({
         receipt,
         receipt_authority,
         store,
@@ -215,10 +277,22 @@ async function withRuntime(run) {
         ...overrides
       })
   };
+  return {
+    runtime,
+    cleanup: () => rm(root, { recursive: true, force: true })
+  };
+}
+
+type ExecutionRuntime = Awaited<ReturnType<typeof createRuntime>>["runtime"];
+
+async function withRuntime<Result>(
+  run: (runtime: ExecutionRuntime) => Promise<Result>
+): Promise<Result> {
+  const created = await createRuntime();
   try {
-    return await run(runtime);
+    return await run(created.runtime);
   } finally {
-    await rm(root, { recursive: true, force: true });
+    await created.cleanup();
   }
 }
 
@@ -231,7 +305,9 @@ test("bounded synthetic mutation is admitted, verified, and sealed", async () =>
     assert.equal(await readFile(runtime.target, "utf8"), "after\n");
     assert.equal(runtime.seal_authority.verify(result.evidence_seal), result.evidence_seal);
     assert.equal((await runtime.store.inspect(runtime.receipt.id)).state, "CONSUMED");
-    assert((await runtime.ledger.head()).sequence >= 5);
+    const ledgerHead = await runtime.ledger.head();
+    assert.ok(ledgerHead, "sealed execution must have a ledger head");
+    assert(ledgerHead.sequence >= 5);
   });
 });
 
@@ -281,8 +357,8 @@ test("silent, out-of-authority, and rollback-free actions cannot obtain a receip
     assert.equal(rollbackFree.status, "DENY");
     for (const decision of [silent, outside, rollbackFree]) {
       assert.throws(
-        () => runtime.receipt_authority.issue({ decision, issued_at: T1 }),
-        (error) => error.code === "CINT_RECEIPT_DECISION_INELIGIBLE"
+        () => issueUntrusted(runtime.receipt_authority, { decision, issued_at: T1 }),
+        (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_DECISION_INELIGIBLE")
       );
     }
   });
@@ -422,17 +498,12 @@ test("runtime adapter capability mismatch is rejected before preparation", async
       interrupt: false,
       outcome_verification: true
     });
-    const adapter = {
-      id: runtime.adapter.id,
+    const adapter = adapterWithHooks(runtime, {
       capability,
-      prepare: async (...args) => {
+      afterPrepare: () => {
         prepareCalls += 1;
-        return runtime.adapter.prepare(...args);
-      },
-      execute: runtime.adapter.execute.bind(runtime.adapter),
-      verify: runtime.adapter.verify.bind(runtime.adapter),
-      rollback: runtime.adapter.rollback.bind(runtime.adapter)
-    };
+      }
+    });
     const result = await runtime.execute({ adapter });
     assert.equal(result.status, "FAIL_CLOSED");
     assert.equal(result.error_code, "CINT_ADAPTER_MISMATCH");
@@ -470,7 +541,7 @@ test("revalidation rejects alien adapter capability and machine state protocols"
     for (const [field, protocol] of [
       ["adapter_capability", "not-cint/adapter-capability/999"],
       ["machine_state", "not-cint/machine-state/999"]
-    ]) {
+    ] as const) {
       const record = rehashRecord(runtime.snapshot[field], { protocol, forbidden_field: true });
       const revalidation = revalidateReceipt({
         receipt: runtime.receipt,
@@ -480,7 +551,7 @@ test("revalidation rejects alien adapter capability and machine state protocols"
         now: T1
       });
       assert.equal(revalidation.status, "REJECTED", field);
-      assert(revalidation.reason_codes.includes("CINT_PROTOCOL_INVALID"), field);
+      assert(revalidation.reason_codes.some((reason) => reason === "CINT_PROTOCOL_INVALID"), field);
     }
   });
 });
@@ -503,27 +574,20 @@ test("alien machine state fails execution admission before action", async () => 
 
 test("policy drift introduced during preparation is revalidated before execution", async () => {
   await withRuntime(async (runtime) => {
-    let activeSnapshot = runtime.snapshot;
+    let activeSnapshot: ExecutionSnapshot = runtime.snapshot;
     let snapshotCalls = 0;
     let executeCalls = 0;
-    const adapter = {
-      id: runtime.adapter.id,
-      capability: runtime.adapter.capability,
-      prepare: async (...args) => {
-        const prepared = await runtime.adapter.prepare(...args);
+    const adapter = adapterWithHooks(runtime, {
+      afterPrepare: () => {
         activeSnapshot = {
           ...runtime.snapshot,
           policy: runtime.makePolicy({ version: "r0.2", epoch: 2, issued_at: T1 })
         };
-        return prepared;
       },
-      execute: async (...args) => {
+      beforeExecute: () => {
         executeCalls += 1;
-        return runtime.adapter.execute(...args);
-      },
-      verify: runtime.adapter.verify.bind(runtime.adapter),
-      rollback: runtime.adapter.rollback.bind(runtime.adapter)
-    };
+      }
+    });
     const result = await runtime.execute({
       adapter,
       snapshot_provider: async () => {
@@ -541,13 +605,10 @@ test("policy drift introduced during preparation is revalidated before execution
 
 test("authority revocation introduced during preparation is revalidated before execution", async () => {
   await withRuntime(async (runtime) => {
-    let activeSnapshot = runtime.snapshot;
+    let activeSnapshot: ExecutionSnapshot = runtime.snapshot;
     let executeCalls = 0;
-    const adapter = {
-      id: runtime.adapter.id,
-      capability: runtime.adapter.capability,
-      prepare: async (...args) => {
-        const prepared = await runtime.adapter.prepare(...args);
+    const adapter = adapterWithHooks(runtime, {
+      afterPrepare: () => {
         activeSnapshot = {
           ...runtime.snapshot,
           authority: revokeAuthority(runtime.authority, {
@@ -555,15 +616,11 @@ test("authority revocation introduced during preparation is revalidated before e
             reason: "Execution authority withdrawn during preparation"
           })
         };
-        return prepared;
       },
-      execute: async (...args) => {
+      beforeExecute: () => {
         executeCalls += 1;
-        return runtime.adapter.execute(...args);
-      },
-      verify: runtime.adapter.verify.bind(runtime.adapter),
-      rollback: runtime.adapter.rollback.bind(runtime.adapter)
-    };
+      }
+    });
     const result = await runtime.execute({ adapter, snapshot_provider: async () => activeSnapshot });
     assert.equal(result.status, "REVOKED");
     assert.equal(result.action_started, false);
@@ -581,6 +638,8 @@ test("receipt expiry crossed during preparation prevents every action", async ()
     assert.equal(result.status, "REVOKED");
     assert.equal(result.error_code, "CINT_RECEIPT_EXPIRED");
     assert.equal(result.completed_at, T2);
+    assert.notEqual(result.revalidation_digest, null);
+    if (result.revalidation_digest === null) throw new Error("revoked execution must bind revalidation");
     assert.match(result.revalidation_digest, /^[a-f0-9]{64}$/);
     assert.equal(result.action_started, false);
     assert.equal(counters.execute_calls, 0);
@@ -598,8 +657,8 @@ test("authority expiry crossed during preparation is evaluated at the final trus
       ...runtime.snapshot,
       now: EXPIRY
     });
-    assert(finalRevalidation.reason_codes.includes("CINT_RECEIPT_EXPIRED"));
-    assert(finalRevalidation.reason_codes.includes("CINT_AUTHORITY_EXPIRED"));
+    assert(finalRevalidation.reason_codes.some((reason) => reason === "CINT_RECEIPT_EXPIRED"));
+    assert(finalRevalidation.reason_codes.some((reason) => reason === "CINT_AUTHORITY_EXPIRED"));
     const result = await runtime.execute({
       adapter: adapterAdvancingClock(runtime, EXPIRY, counters)
     });
@@ -639,17 +698,11 @@ test("stale caller time cannot override an expired final trusted time", async ()
   await withRuntime(async (runtime) => {
     runtime.clock.set(T2);
     let executeCalls = 0;
-    const adapter = {
-      id: runtime.adapter.id,
-      capability: runtime.adapter.capability,
-      prepare: runtime.adapter.prepare.bind(runtime.adapter),
-      execute: async (...args) => {
+    const adapter = adapterWithHooks(runtime, {
+      beforeExecute: () => {
         executeCalls += 1;
-        return runtime.adapter.execute(...args);
-      },
-      verify: runtime.adapter.verify.bind(runtime.adapter),
-      rollback: runtime.adapter.rollback.bind(runtime.adapter)
-    };
+      }
+    });
     const result = await runtime.execute({ adapter, at: T1 });
     assert.equal(result.status, "REVOKED");
     assert.equal(result.error_code, "CINT_RECEIPT_EXPIRED");
@@ -662,17 +715,11 @@ test("stale caller time cannot override an expired final trusted time", async ()
 test("trusted clock failure after preparation fails closed without action", async () => {
   await withRuntime(async (runtime) => {
     let executeCalls = 0;
-    const adapter = {
-      id: runtime.adapter.id,
-      capability: runtime.adapter.capability,
-      prepare: runtime.adapter.prepare.bind(runtime.adapter),
-      execute: async (...args) => {
+    const adapter = adapterWithHooks(runtime, {
+      beforeExecute: () => {
         executeCalls += 1;
-        return runtime.adapter.execute(...args);
-      },
-      verify: runtime.adapter.verify.bind(runtime.adapter),
-      rollback: runtime.adapter.rollback.bind(runtime.adapter)
-    };
+      }
+    });
     const result = await runtime.execute({
       adapter,
       clock: { now: () => { throw new Error("clock unavailable"); } }
@@ -695,6 +742,8 @@ test("all thirteen public protocol schemas execute on valid and invalid runtime 
       now: T1
     });
     const result = await runtime.execute();
+    assert.equal(result.status, "SEALED");
+    if (result.status !== "SEALED") throw new Error("schema fixture execution must seal");
     const records = [
       runtime.adapter.capability,
       runtime.authority,
@@ -720,7 +769,7 @@ test("all thirteen public protocol schemas execute on valid and invalid runtime 
       const { digest, ...unsigned } = record;
       assert.throws(
         () => sealRecord({ ...unsigned, schema_forbidden_field: true }),
-        (error) => error.code === "CINT_SCHEMA_INVALID",
+        (error: unknown) => hasErrorCode(error, "CINT_SCHEMA_INVALID"),
         record.protocol
       );
       const invalidUnsigned = { ...unsigned, schema_forbidden_field: true };
@@ -728,7 +777,7 @@ test("all thirteen public protocol schemas execute on valid and invalid runtime 
       assert.equal(validateCintSchema(forgedInput).valid, false, record.protocol);
       assert.throws(
         () => verifyProtocolRecord(forgedInput, record.protocol, "forged input"),
-        (error) => error.code === "CINT_SCHEMA_INVALID",
+        (error: unknown) => hasErrorCode(error, "CINT_SCHEMA_INVALID"),
         record.protocol
       );
     }

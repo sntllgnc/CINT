@@ -14,9 +14,15 @@ import {
   createMachineStateSnapshot,
   createPolicySnapshot,
   decide,
-  resolvePrincipal
+  resolvePrincipal,
+  sha256
 } from "../src/cint/index.js";
-import { sha256 } from "../src/util.js";
+import type { AdmitDecision } from "../src/cint/types/records.js";
+import {
+  hasErrorCode,
+  issueUntrusted,
+  requireAdmit
+} from "./cint-test-support.js";
 
 const T0 = "2026-08-27T00:00:00.000Z";
 const T1 = "2026-08-27T00:01:00.000Z";
@@ -25,7 +31,12 @@ const T3 = "2026-08-27T00:11:00.000Z";
 const EXPIRY = "2026-08-27T01:00:00.000Z";
 const TARGET = Object.freeze({ path: "sandbox/target.txt" });
 
-function decisionFor(overrides = {}) {
+interface DecisionFixtureOverrides {
+  readonly intent?: Readonly<Record<string, unknown>>;
+  readonly id?: unknown;
+}
+
+function decisionFor(overrides: DecisionFixtureOverrides = {}) {
   const intent = createIntent({
     id: "intent.receipt.1",
     principal_id: "principal.operator",
@@ -118,7 +129,7 @@ function receiptAuthority() {
   });
 }
 
-function receiptFor(decision = decisionFor()) {
+function receiptFor(decision: AdmitDecision = requireAdmit(decisionFor())) {
   return receiptAuthority().issue({
     id: "receipt.demo.1",
     nonce: "receipt-nonce-0000000001",
@@ -127,13 +138,15 @@ function receiptFor(decision = decisionFor()) {
   });
 }
 
-function reforge(record, changes) {
-  const unsigned = { ...record, ...changes };
-  delete unsigned.digest;
+function reforge(record: object, changes: Readonly<Record<string, unknown>>) {
+  const unsigned = {
+    ...Object.fromEntries(Object.entries(record).filter(([key]) => key !== "digest")),
+    ...changes
+  };
   return { ...unsigned, digest: canonicalDigest(unsigned) };
 }
 
-async function withStore(run) {
+async function withStore<Result>(run: (store: FileReceiptStore) => Promise<Result>): Promise<Result> {
   const root = await mkdtemp(path.join(os.tmpdir(), "cint-receipt-test-"));
   try {
     return await run(new FileReceiptStore(root));
@@ -152,8 +165,8 @@ test("only an ADMIT decision can produce a receipt", () => {
   const denied = decisionFor({ intent: { request: null }, id: "decision.receipt.denied" });
   assert.equal(denied.status, "DENY");
   assert.throws(
-    () => receiptAuthority().issue({ decision: denied, issued_at: T1 }),
-    (error) => error.code === "CINT_RECEIPT_DECISION_INELIGIBLE"
+    () => issueUntrusted(receiptAuthority(), { decision: denied, issued_at: T1 }),
+    (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_DECISION_INELIGIBLE")
   );
 });
 
@@ -176,14 +189,14 @@ test("rehashed binding forgery fails the receipt signature", () => {
   });
   assert.throws(
     () => authority.verify(forged, { now: T1 }),
-    (error) => error.code === "CINT_RECEIPT_SIGNATURE_INVALID"
+    (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_SIGNATURE_INVALID")
   );
 });
 
 test("expired receipt verification is rejected", () => {
   assert.throws(
     () => receiptAuthority().verify(receiptFor(), { now: T2 }),
-    (error) => error.code === "CINT_RECEIPT_EXPIRED"
+    (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_EXPIRED")
   );
 });
 
@@ -196,7 +209,7 @@ test("registered receipt is consumed exactly once", async () => {
     assert.equal((await store.inspect(receipt.id)).state, "CONSUMED");
     await assert.rejects(
       store.consume(receipt, { consumed_at: T1, revalidate: validRevalidation }),
-      (error) => error.code === "CINT_RECEIPT_REPLAY_REJECTED"
+      (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_REPLAY_REJECTED")
     );
   });
 });
@@ -211,7 +224,9 @@ test("parallel replay produces one atomic consumer", async () => {
     ]);
     assert.equal(attempts.filter((attempt) => attempt.status === "fulfilled").length, 1);
     assert.equal(attempts.filter((attempt) => attempt.status === "rejected").length, 1);
-    assert.equal(attempts.find((attempt) => attempt.status === "rejected").reason.code, "CINT_RECEIPT_REPLAY_REJECTED");
+    const rejected = attempts.find((attempt): attempt is PromiseRejectedResult => attempt.status === "rejected");
+    assert.ok(rejected, "one replay attempt must reject");
+    assert.ok(hasErrorCode(rejected.reason, "CINT_RECEIPT_REPLAY_REJECTED"));
   });
 });
 
@@ -222,12 +237,12 @@ test("presented receipt must match the registered digest", async () => {
     const other = receiptAuthority().issue({
       id: receipt.id,
       nonce: "receipt-nonce-0000000002",
-      decision: decisionFor(),
+      decision: requireAdmit(decisionFor()),
       issued_at: T1
     });
     await assert.rejects(
       store.consume(other, { consumed_at: T1, revalidate: validRevalidation }),
-      (error) => error.code === "CINT_RECEIPT_STORE_MISMATCH"
+      (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_STORE_MISMATCH")
     );
   });
 });
@@ -245,7 +260,7 @@ test("failed immediate revalidation terminally rejects the receipt", async () =>
           digest: "b".repeat(64)
         })
       }),
-      (error) => error.code === "CINT_RECEIPT_REVOKED"
+      (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_REVOKED")
     );
     assert.equal((await store.inspect(receipt.id)).state, "REJECTED");
   });
@@ -257,7 +272,7 @@ test("receipt expiry at consumption is terminal and fail closed", async () => {
     await store.register(receipt, { registered_at: T1 });
     await assert.rejects(
       store.consume(receipt, { consumed_at: T3, revalidate: validRevalidation }),
-      (error) => error.code === "CINT_RECEIPT_REVOKED"
+      (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_REVOKED")
     );
     assert.equal((await store.inspect(receipt.id)).state, "REJECTED");
   });
@@ -271,7 +286,7 @@ test("ambiguous crash lock remains fail closed", async () => {
     await writeFile(lock, "crash-residue", "utf8");
     await assert.rejects(
       store.consume(receipt, { consumed_at: T1, revalidate: validRevalidation }),
-      (error) => error.code === "CINT_RECEIPT_REPLAY_REJECTED"
+      (error: unknown) => hasErrorCode(error, "CINT_RECEIPT_REPLAY_REJECTED")
     );
     assert.equal((await store.inspect(receipt.id)).state, "LOCKED");
   });

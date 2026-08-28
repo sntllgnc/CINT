@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { CINT_IDENTITY, main, renderCintHelp } from "../src/cint/cli.js";
+import { parseJsonRecord } from "./cint-test-support.js";
 
 test("CINT CLI reports public review exposure without default-product or release authority", async () => {
   let output = "";
   assert.equal(await main(["identity"], { write: (value) => (output += value) }), 0);
-  const identity = JSON.parse(output);
+  const identity = parseJsonRecord(output);
   assert.deepEqual(identity, CINT_IDENTITY);
   assert.equal(identity.public_display, "SI1 CINT");
   assert.equal(identity.release_state, "PUBLIC_R0_SOURCE");

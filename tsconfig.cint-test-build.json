@@ -1,7 +1,8 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
+    "rootDir": ".",
+    "outDir": "./.test-dist",
     "declaration": false,
     "declarationMap": false,
     "sourceMap": false
@@ -11,7 +12,6 @@
     "bin/cint.ts",
     "tests/cint-legacy-test-boundary.ts",
     "tests/cint-test-support.ts",
-    "tests/cint-*.test.ts",
-    "tests/types/**/*.ts"
+    "tests/cint-*.test.ts"
   ]
 }

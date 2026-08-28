@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   canonicalDigest,
+  canonicalJson,
   createAdapterCapability,
   createAuthorityGrant,
   createIntent,
@@ -15,7 +16,7 @@ import {
   sealRecord,
   transitionState
 } from "../src/cint/index.js";
-import { canonicalJson } from "../src/util.js";
+import { hasErrorCode, hasReason } from "./cint-test-support.js";
 
 const T0 = "2026-08-27T00:00:00.000Z";
 const T1 = "2026-08-27T00:01:00.000Z";
@@ -23,7 +24,24 @@ const T2 = "2026-08-27T00:10:00.000Z";
 const EXPIRY = "2026-08-27T01:00:00.000Z";
 const TARGET = Object.freeze({ path: "sandbox/target.txt" });
 
-function records(overrides = {}) {
+type RecordPatch = Readonly<Record<string, unknown>>;
+
+interface RecordOverrides {
+  readonly intent?: RecordPatch;
+  readonly principal?: RecordPatch;
+  readonly authority?: RecordPatch;
+  readonly policy?: RecordPatch;
+  readonly adapter_capability?: RecordPatch;
+  readonly machine_state?: RecordPatch;
+}
+
+interface DecisionOverrides {
+  readonly id?: unknown;
+  readonly now?: unknown;
+  readonly expires_at?: unknown;
+}
+
+function records(overrides: RecordOverrides = {}) {
   const intent = createIntent({
     id: "intent.demo.1",
     principal_id: "principal.operator",
@@ -104,7 +122,7 @@ function records(overrides = {}) {
   return { intent, principal, authority, policy, adapter_capability, machine_state };
 }
 
-function decideRecords(values, overrides = {}) {
+function decideRecords(values: object, overrides: DecisionOverrides = {}) {
   return decide({
     id: overrides.id ?? "decision.demo.1",
     ...values,
@@ -113,8 +131,8 @@ function decideRecords(values, overrides = {}) {
   });
 }
 
-function rehashRecord(record, overrides) {
-  const { digest, ...unsigned } = record;
+function rehashRecord(record: object, overrides: RecordPatch) {
+  const unsigned = Object.fromEntries(Object.entries(record).filter(([key]) => key !== "digest"));
   const changed = { ...unsigned, ...overrides };
   return { ...changed, digest: canonicalDigest(changed) };
 }
@@ -124,14 +142,14 @@ test("canonical parser admits only the canonical byte representation", () => {
   assert.deepEqual(parseCanonicalJson(canonicalJson(value)), { a: [true, null], z: 1 });
   assert.throws(
     () => parseCanonicalJson(JSON.stringify(value, null, 2)),
-    (error) => error.code === "CINT_JSON_NOT_CANONICAL"
+    (error: unknown) => hasErrorCode(error, "CINT_JSON_NOT_CANONICAL")
   );
 });
 
 test("strict intent construction rejects unknown fields", () => {
   assert.throws(
     () => records({ intent: { undeclared_field: true } }),
-    (error) => error.code === "CINT_UNKNOWN_FIELD"
+    (error: unknown) => hasErrorCode(error, "CINT_UNKNOWN_FIELD")
   );
 });
 
@@ -146,13 +164,13 @@ test("exact current bindings produce ADMIT without executable authority", () => 
 test("silent request is denied", () => {
   const decision = decideRecords(records({ intent: { request: null } }));
   assert.equal(decision.status, "DENY");
-  assert(decision.reason_codes.includes("CINT_SILENT_REQUEST"));
+  assert(hasReason(decision, "CINT_SILENT_REQUEST"));
 });
 
 test("undeclared effect is denied", () => {
   const decision = decideRecords(records({ intent: { declared_effects: [] } }));
   assert.equal(decision.status, "DENY");
-  assert(decision.reason_codes.includes("CINT_EFFECT_UNDECLARED"));
+  assert(hasReason(decision, "CINT_EFFECT_UNDECLARED"));
 });
 
 test("target outside the exact authority binding is denied", () => {
@@ -169,26 +187,26 @@ test("target outside the exact authority binding is denied", () => {
   });
   const decision = decideRecords(values);
   assert.equal(decision.status, "DENY");
-  assert(decision.reason_codes.includes("CINT_AUTHORITY_ACTION_DENIED"));
+  assert(hasReason(decision, "CINT_AUTHORITY_ACTION_DENIED"));
 });
 
 test("unresolved counter-intent requires REVIEW", () => {
   const decision = decideRecords(records({ intent: { uncertainties: ["Target ownership needs confirmation"] } }));
   assert.equal(decision.status, "REVIEW");
   assert.equal(decision.receipt_eligible, false);
-  assert(decision.reason_codes.includes("CINT_COUNTER_INTENT_UNRESOLVED"));
+  assert(hasReason(decision, "CINT_COUNTER_INTENT_UNRESOLVED"));
 });
 
 test("unavailable CINT machine state fails closed", () => {
   const decision = decideRecords(records({ machine_state: { available: false } }));
   assert.equal(decision.status, "DENY");
-  assert(decision.reason_codes.includes("CINT_UNAVAILABLE"));
+  assert(hasReason(decision, "CINT_UNAVAILABLE"));
 });
 
 test("consequential action without rollback capability is denied", () => {
   const decision = decideRecords(records({ adapter_capability: { rollback: false } }));
   assert.equal(decision.status, "DENY");
-  assert(decision.reason_codes.includes("CINT_ROLLBACK_REQUIRED"));
+  assert(hasReason(decision, "CINT_ROLLBACK_REQUIRED"));
 });
 
 test("tampered sealed input cannot reach a decision", () => {
@@ -196,7 +214,7 @@ test("tampered sealed input cannot reach a decision", () => {
   const tamperedIntent = { ...values.intent, request: "Different request" };
   assert.throws(
     () => decideRecords({ ...values, intent: tamperedIntent }),
-    (error) => error.code === "CINT_RECORD_TAMPERED"
+    (error: unknown) => hasErrorCode(error, "CINT_RECORD_TAMPERED")
   );
 });
 
@@ -210,7 +228,7 @@ test("rehashed authority with an alien protocol cannot reach ADMIT", () => {
   });
   assert.throws(
     () => decideRecords({ ...current, authority: forged }, { id: "decision.schema-invalid-authority" }),
-    (error) => error.code === "CINT_PROTOCOL_INVALID"
+    (error: unknown) => hasErrorCode(error, "CINT_PROTOCOL_INVALID")
   );
 });
 
@@ -219,17 +237,17 @@ test("adapter capability and machine state require exact protocols and fields", 
   for (const [field, alienProtocol] of [
     ["adapter_capability", "not-cint/adapter-capability/999"],
     ["machine_state", "not-cint/machine-state/999"]
-  ]) {
+  ] as const) {
     const alien = rehashRecord(current[field], { protocol: alienProtocol, forbidden_field: true });
     assert.throws(
       () => decideRecords({ ...current, [field]: alien }, { id: `decision.alien.${field}` }),
-      (error) => error.code === "CINT_PROTOCOL_INVALID",
+      (error: unknown) => hasErrorCode(error, "CINT_PROTOCOL_INVALID"),
       field
     );
     const extraField = rehashRecord(current[field], { forbidden_field: true });
     assert.throws(
       () => decideRecords({ ...current, [field]: extraField }, { id: `decision.extra.${field}` }),
-      (error) => error.code === "CINT_SCHEMA_INVALID",
+      (error: unknown) => hasErrorCode(error, "CINT_SCHEMA_INVALID"),
       field
     );
   }
@@ -238,7 +256,7 @@ test("adapter capability and machine state require exact protocols and fields", 
 test("decision cannot outlive its authority", () => {
   assert.throws(
     () => decideRecords(records(), { expires_at: "2026-08-27T02:00:00.000Z" }),
-    (error) => error.code === "CINT_DECISION_TIME"
+    (error: unknown) => hasErrorCode(error, "CINT_DECISION_TIME")
   );
 });
 
@@ -249,6 +267,6 @@ test("state machine permits only declared transitions", () => {
   assert.equal(admitted.state, "ADMITTED");
   assert.throws(
     () => transitionState(admitted, { state: "EXECUTING", at: T2, evidence_digest: null }),
-    (error) => error.code === "CINT_STATE_TRANSITION"
+    (error: unknown) => hasErrorCode(error, "CINT_STATE_TRANSITION")
   );
 });
