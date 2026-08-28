@@ -23,16 +23,24 @@
     "./adapters/codex-delegation": "./src/cint/adapters/codex/index.js"
   },
   "scripts": {
+    "build": "node ./scripts/build.mjs",
     "cint:identity": "node ./bin/cint.js identity",
-    "cint:test": "node --test ./tests/cint-*.test.js",
+    "cint:test": "npm run test:cint",
+    "clean": "node ./scripts/clean.mjs",
     "demo": "node ./bin/agent-floor.js demo",
     "doctor": "node ./bin/agent-floor.js doctor",
-    "test": "node --test",
+    "pack:verify": "node ./scripts/verify-package.mjs",
+    "scan:escapes": "node ./scripts/scan-typescript-escape-hatches.mjs",
+    "test": "node ./scripts/run-test-suite.mjs all",
+    "test:cint": "node ./scripts/run-test-suite.mjs cint",
+    "test:legacy": "node ./scripts/run-test-suite.mjs legacy",
+    "test:types": "npm run typecheck",
+    "typecheck": "tsc --project tsconfig.test.json",
     "runtime:verify": "node ./scripts/verify-runtime-support.mjs",
     "schema:verify": "node ./scripts/verify-cint-schema-package.mjs",
     "public:audit": "node ./scripts/publication-audit.mjs",
     "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs",
-    "verify": "npm run runtime:verify && npm test && npm run demo && npm audit && npm run public:audit && npm run evidence:verify"
+    "verify": "npm run runtime:verify && npm run scan:escapes && npm run typecheck && npm run build && npm test && npm run demo && npm audit && npm run public:audit && npm run evidence:verify"
   },
   "engines": {
     "node": "^22.0.0 || ^24.0.0 || ^26.0.0"
@@ -41,5 +49,9 @@
   "dependencies": {
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.4.0",
+    "typescript": "7.0.2"
   }
 }
