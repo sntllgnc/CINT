@@ -2,13 +2,19 @@
 
 ## Supported line
 
-Security corrections for the public CINT-R0 source prerelease are developed
-through protected changes to `main`. The immutable Agent Floor release remains
-historical evidence.
+The public CINT-R0 source prerelease remains the released line. The R1
+TypeScript branch is a review candidate, not a release or production baseline.
+Security corrections enter `main` only through separately authorized protected
+changes. The immutable Agent Floor release remains historical evidence.
 
 The active security baseline is the latest security-patched Node.js 24 release.
 Node.js 22 is retained temporarily for compatibility testing, Node.js 26 is a
 forward-compatibility lane, and Node.js 20 is historical and unsupported.
+
+Strict TypeScript compilation is a development control only. Runtime security
+continues to depend on the unchanged JSON Schema/AJV, exact-key, canonical
+digest, HMAC, revalidation, one-shot, trusted-time, outcome, rollback, and seal
+checks.
 
 ## Report a vulnerability
 

@@ -8,6 +8,19 @@ CINT separates interpretation, authority, execution, and evidence. A request is
 not authority. An `ADMIT` decision is not authority. A signed receipt becomes
 executable only after immediate revalidation and atomic one-shot consumption.
 
+## R1 source and runtime boundary
+
+R1 expresses the CINT control plane in strict TypeScript and emits JavaScript,
+declarations, and source maps into ignored `dist/` output. TypeScript types are
+erased during compilation. They make invalid state substitutions fail during
+development, but they do not validate a runtime value or confer execution
+authority.
+
+Every external record therefore begins as `unknown` and crosses the same R0
+runtime controls: exact keys, one of the 13 unchanged JSON Schemas, canonical
+JSON, content digests, protocol checks, and the applicable HMAC and gate
+verification. Runtime schemas remain authoritative.
+
 ## Control planes
 
 | Plane | Responsibility | Cannot do |
@@ -75,10 +88,11 @@ during preparation. Adapters receive no receipt or seal key. They cannot resolve
 principals, change authority, issue decisions, consume receipts, or seal
 outcomes through the adapter interface.
 
-The supported core entrypoint, `src/cint/index.js`, imports no action adapter or
-legacy Agent Floor CLI. Adapters are available only through explicit subpath
-entrypoints. The `cint legacy` command loads Adapter 01 lazily after explicit
-invocation.
+The TypeScript core entrypoint, `src/cint/index.ts`, imports no action adapter or
+legacy Agent Floor CLI. Package consumers resolve compiled JavaScript and
+declarations under `dist/`. Adapters are available only through explicit
+subpath entrypoints. The `cint legacy` command loads Adapter 01 lazily through
+the typed boundary after explicit invocation.
 
 The Codex delegation adapter binds the preserved Agent Floor packet and task
 digests, then executes the existing clean, bounded, read-only runner. Its

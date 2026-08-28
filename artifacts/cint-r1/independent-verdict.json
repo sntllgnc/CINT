@@ -1,0 +1,59 @@
+{
+  "protocol": "cint-r1/independent-verdict/1",
+  "reviewed_at": "2026-08-28T12:40:43Z",
+  "baseline_commit": "acc857b5d6fadd363816ad9dbf2fdc710a35ba15",
+  "candidate_pre_review_head": "b549414c4c88682c5e1b56e3a29a8723bfbdb416",
+  "reviewer_count": 2,
+  "reviewers": [
+    {
+      "id": "C",
+      "scope": "authority-and-runtime-boundary",
+      "context_mode": "clean",
+      "fork_turns": "none",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "child_agents": 0,
+      "tracked_mutations": 0,
+      "finding_count": 0,
+      "verdict": "ACCEPT-CINT-R1-TYPESCRIPT-CANDIDATE"
+    },
+    {
+      "id": "D",
+      "scope": "build-package-node-and-legacy",
+      "context_mode": "clean",
+      "fork_turns": "none",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "child_agents": 0,
+      "tracked_mutations": 0,
+      "finding_count": 0,
+      "verdict": "ACCEPT-CINT-R1-TYPESCRIPT-CANDIDATE"
+    }
+  ],
+  "root_attestation": {
+    "ordered_verification": "PASS",
+    "node_24_runtime": "24.20.0",
+    "compiled_cint_tests": "56/56",
+    "legacy_tests": "16/16",
+    "total_runtime_tests": "72/72",
+    "compile_time_negative_contracts": "14/14",
+    "escape_hatch_findings": 0,
+    "import_boundary_findings": 0,
+    "runtime_schemas_identical": "13/13",
+    "protocol_identifiers_identical": "24/24",
+    "error_codes_identical": "103/103",
+    "behavioral_equivalence": "18/18 PASS",
+    "af_g0_evidence": "53/53",
+    "dependency_vulnerabilities": 0,
+    "publication_findings": 0,
+    "runtime_exports_resolved": "4/4",
+    "declaration_exports_resolved": "4/4",
+    "private_source_map_paths": 0,
+    "typescript_source_files": 29,
+    "javascript_files_under_src_cint": 0,
+    "tracked_generated_files": 0,
+    "prohibited_dependency_count": 0
+  },
+  "findings": [],
+  "verdict": "ACCEPT-CINT-R1-TYPESCRIPT-CANDIDATE"
+}

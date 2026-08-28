@@ -27,6 +27,19 @@ request
   -> evidence seal or rollback
 ```
 
+## R1 candidate state
+
+The `cint-r1-typescript` branch is a review candidate that migrates the CINT
+control plane to strict TypeScript while preserving the R0 runtime contract.
+TypeScript makes authority-state and adapter-boundary distinctions visible to
+the compiler; it does not become runtime authority. All untrusted records still
+enter as `unknown` and must pass the unchanged JSON Schema/AJV, exact-key,
+canonical-byte, digest, HMAC, revalidation, one-shot, trusted-time, outcome,
+and seal controls.
+
+The package remains private and versioned `0.1.0-cint-r0`. R1 grants no merge,
+tag, release, npm-publication, or production-deployment authority.
+
 ## R0 state
 
 `CINT-R0` is the public source and verification baseline for the SI1 CINT
@@ -88,9 +101,8 @@ Node.js 22 and 26 are tested compatibility lanes, not the development baseline.
 
 ```sh
 npm ci
-npm test
-npm run cint:identity
 npm run verify
+npm run cint:identity
 ```
 
 The historical `npm run demo` remains available as the AF-G0 Adapter 01
@@ -99,14 +111,18 @@ regression. It is not the CINT product definition.
 ## Repository map
 
 ```text
-src/cint/                         adapter-independent CINT core and execution boundary
-src/cint/adapters/                explicit, separately imported R0 action adapters
+src/cint/**/*.ts                  strict TypeScript CINT control plane
+src/cint/adapters/                explicit, separately imported typed action adapters
 src/adapters/codex-delegation/    preserved Agent Floor compatibility kernel
 schemas/cint/                     strict authority-bearing JSON schemas
 tests/cint-*.test.js              CINT conformance and end-to-end proofs
+tests/types/                      compile-time positive and negative contracts
+dist/                             ignored generated JavaScript and declarations
 docs/cint-r0/                     gate evidence and public R0 release notes
+docs/cint-r1/                     R1 gate maps and review evidence
 docs/archive/                     historical Agent Floor and competition material
 artifacts/cint-r0/                gate ledger and sanitized gate receipts
+artifacts/cint-r1/                R1 baseline and behavioral-equivalence records
 ```
 
 ## Design and review
@@ -116,9 +132,12 @@ artifacts/cint-r0/                gate ledger and sanitized gate receipts
 - [Threat model](docs/THREAT-MODEL.md)
 - [Privacy](docs/PRIVACY.md)
 - [Limitations](docs/LIMITATIONS.md)
+- [Runtime support](docs/RUNTIME-SUPPORT.md)
+- [TypeScript R1 boundary](docs/TYPESCRIPT-R1.md)
+- [Framework boundary](docs/FRAMEWORK-BOUNDARY.md)
 - [Codex Adapter 01](docs/CODEX-ADAPTER.md)
 - [CINT-R0 gate ledger](artifacts/cint-r0/gate-ledger.json)
-- [Public R0 source release](docs/RELEASE.md)
+- [Historical R0 source release](docs/RELEASE.md)
 - [Public release notes](docs/cint-r0/PUBLIC-RELEASE-NOTES.md)
 
 The immutable Agent Floor baseline remains the tagged release

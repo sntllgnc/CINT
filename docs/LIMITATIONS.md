@@ -1,4 +1,9 @@
-# CINT-R0 limitations and non-claims
+# CINT limitations and non-claims
+
+- R1 TypeScript types provide compile-time contract visibility only. They are
+  erased from emitted JavaScript and never replace runtime schema validation,
+  exact-key rejection, canonical digests, HMAC verification, revalidation,
+  one-shot consumption, or trusted-time checks.
 
 - R0 is a local protocol and proof runtime, not a distributed authorization
   service.
@@ -13,7 +18,7 @@
   adapters that touch concurrent external systems need an adapter-specific
   transaction or conditional-write mechanism.
 - Adapter capability records require preparation to be side-effect-free, and
-  the core revalidates after preparation. R0 trusts the selected in-process
+  the core revalidates after preparation. CINT trusts the selected in-process
   adapter implementation to honor that contract; it does not sandbox hostile
   adapter code or prove the absence of unrelated side effects.
 - The synthetic adapter proves one disposable existing-file mutation. It does
@@ -29,6 +34,13 @@
 - CINT does not establish account billing, provider quota causation, hostile-code
   containment, operating-system integrity, or protection after receipt/seal key
   compromise.
+- Node.js 24 is the normative runtime major. Node.js 22 is a temporary
+  compatibility lane, Node.js 26 is a forward-compatibility lane, and Node.js
+  20 is historical only. Support for a major still requires its latest
+  security-patched release.
+- R1 contains no Rust, WASM, Three.js, browser, WebGL, web-server, or UI trusted
+  runtime. An isolated Rust core and any visualization surface require separate
+  future authority; neither is implied by this migration.
 - `v0.1.0-cint-r0` is a public source prerelease. It does not authorize npm
   publication, production deployment, third-party operational reliance,
   machine-wide enforcement, or physical autonomous action.
