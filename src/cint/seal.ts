@@ -153,6 +153,11 @@ export class OutcomeSealAuthority {
       [],
       "evidence seal"
     );
+    assertCint(
+      seal.protocol === "cint/evidence-seal/1" && seal.status === "SEALED",
+      "CINT_SEAL_INVALID",
+      "Unsupported evidence seal"
+    );
     assertCint(seal.issuer_id === this.issuer_id, "CINT_SEAL_ISSUER_MISMATCH", "Evidence seal issuer mismatch");
     for (const field of [
       "receipt_digest",
