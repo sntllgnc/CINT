@@ -92,10 +92,23 @@ function decision(api, values, id) {
 
 async function vector(root) {
   const api = await loadApi(root);
+  const admit = decision(api, records(api), "decision.parity.admit");
+  const receiptAuthority = new api.DecisionReceiptAuthority({
+    issuer_id: "cint.receipt-authority.parity",
+    key: Buffer.alloc(32, 7)
+  });
+  const receipt = receiptAuthority.issue({
+    id: "receipt.parity.issued",
+    nonce: "receipt-parity-nonce-0001",
+    decision: admit,
+    issued_at: T1
+  });
+  receiptAuthority.verify(receipt, { now: T1 });
   return {
-    admit: decision(api, records(api), "decision.parity.admit"),
+    admit,
     deny: decision(api, records(api, { request: null }), "decision.parity.deny"),
-    review: decision(api, records(api, { uncertainties: ["operator confirmation pending"] }), "decision.parity.review")
+    review: decision(api, records(api, { uncertainties: ["operator confirmation pending"] }), "decision.parity.review"),
+    receipt
   };
 }
 
@@ -104,12 +117,14 @@ const candidate = await vector(candidateRoot);
 assert.deepEqual(candidate, baseline, "compiled decision vectors differ from v0.1.0-cint-r0");
 
 console.log(JSON.stringify({
-  gate: "CINT-R1-GOLDEN-DECISION-PARITY",
+  gate: "CINT-R1-GOLDEN-AUTHORITY-PARITY",
   verdict: "PASS",
-  scenarios: ["ADMIT", "DENY", "REVIEW"],
+  scenarios: ["ADMIT", "DENY", "REVIEW", "RECEIPT_ISSUE_AND_VERIFY"],
   digests: {
     admit: candidate.admit.digest,
     deny: candidate.deny.digest,
-    review: candidate.review.digest
-  }
+    review: candidate.review.digest,
+    receipt: candidate.receipt.digest
+  },
+  receipt_signature: candidate.receipt.signature
 }, null, 2));

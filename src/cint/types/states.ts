@@ -4,6 +4,23 @@ export type ExecutionResultStatus = "SEALED" | "ROLLED_BACK" | "REPLAY_REJECTED"
 export type OutcomeStatus = "VERIFIED" | "ROLLED_BACK";
 export type ReceiptStoreState = "ABSENT" | "PENDING" | "LOCKED" | "CONSUMED" | "REJECTED";
 export type AuthorityState = "ACTIVE" | "REVOKED";
+export type CintLifecycleState =
+  | "REQUESTED"
+  | "CHALLENGED"
+  | "DENIED"
+  | "REVIEW"
+  | "ADMITTED"
+  | "RECEIPT_ISSUED"
+  | "REVALIDATED"
+  | "REVOKED"
+  | "RECEIPT_CONSUMED"
+  | "EXECUTING"
+  | "INTERRUPTED"
+  | "VERIFIED"
+  | "ROLLED_BACK"
+  | "SEALED"
+  | "FAIL_CLOSED"
+  | "REPLAY_REJECTED";
 
 export function assertNever(value: never): never {
   throw new Error(`Unhandled CINT state: ${String(value)}`);
