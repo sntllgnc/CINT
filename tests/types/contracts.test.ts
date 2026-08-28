@@ -16,10 +16,13 @@ import type {
   Decision,
   DenyDecision,
   IssuedDecisionReceipt,
+  Revalidation,
   ReviewDecision,
   VerifiedOutcome
 } from "../../src/cint/types/records.js";
 import type { DecisionReceiptAuthority } from "../../src/cint/receipt.js";
+import type { OutcomeSealAuthority } from "../../src/cint/seal.js";
+import type { ExecutionLedgerEntry } from "../../src/cint/evidence.js";
 
 declare const decision: Decision;
 declare const admitDecision: AdmitDecision;
@@ -38,6 +41,9 @@ declare const legacyAdmission: LegacyAgentFloorAdmission;
 declare const unknownProtocolRecord: unknown;
 declare const authority: AuthorityRecord;
 declare const receiptAuthority: DecisionReceiptAuthority;
+declare const sealAuthority: OutcomeSealAuthority;
+declare const revalidation: Revalidation;
+declare const ledgerEntry: ExecutionLedgerEntry;
 
 function requireReceipt(value: IssuedDecisionReceipt): void { void value; }
 function issueReceipt(value: AdmitDecision): void { void value; }
@@ -57,6 +63,7 @@ requireVerifiedOutput(verifiedAdapterOutput);
 requireVerifiedOutcome(verifiedOutcome);
 requireAuthority(authority);
 receiptAuthority.issue({ decision: admitDecision, issued_at: "2026-08-27T00:00:00.000Z" });
+sealAuthority.issue({ receipt: issuedReceipt, consumption: consumedReceipt, revalidation, outcome: verifiedOutcome, ledger_head: ledgerEntry, issued_at: "2026-08-27T00:00:00.000Z" });
 
 // @ts-expect-error a decision is not an issued receipt
 requireReceipt(decision);
@@ -70,6 +77,8 @@ issueReceipt(denyDecision);
 issueReceipt(reviewDecision);
 // @ts-expect-error an issued receipt is not consumed evidence
 requireConsumed(issuedReceipt);
+// @ts-expect-error issued receipt is not consumed evidence for concrete seal issuance
+sealAuthority.issue({ receipt: issuedReceipt, consumption: issuedReceipt, revalidation, outcome: verifiedOutcome, ledger_head: ledgerEntry, issued_at: "2026-08-27T00:00:00.000Z" });
 // @ts-expect-error an outcome digest cannot bind an action
 requireActionDigest(outcomeDigest);
 // @ts-expect-error a policy identifier is not an authority identifier
@@ -78,6 +87,8 @@ requireAuthorityId(policyId);
 requireVerifiedOutput(adapterExecution);
 // @ts-expect-error unverified adapter execution is not a verified outcome
 requireVerifiedOutcome(adapterExecution);
+// @ts-expect-error unverified adapter execution cannot be sealed as an outcome
+sealAuthority.issue({ receipt: issuedReceipt, consumption: consumedReceipt, revalidation, outcome: adapterExecution, ledger_head: ledgerEntry, issued_at: "2026-08-27T00:00:00.000Z" });
 // @ts-expect-error legacy ADMITTED telemetry has no CINT authority
 requireAuthority(legacyAdmission);
 // @ts-expect-error an unknown protocol record must be validated first

@@ -289,23 +289,41 @@ export type Revalidation =
   | RejectedRevalidation
   | FailClosedRevalidation;
 
-export interface AdapterExecution extends SealedRecord<"cint/synthetic-execution/1", ExecutionDigest> {
-  readonly adapter_id: AdapterId;
-  readonly action_type: Identifier;
-}
+export interface AdapterExecution extends SealedRecord<
+  "cint/synthetic-execution/1" | "cint/codex-delegation-execution/1" | "cint/execution-interruption/1",
+  ExecutionDigest
+> {}
 
-export interface OutcomeVerification extends SealedRecord<"cint/outcome-verification/1", VerificationDigest> {
-  readonly status: "VERIFIED" | "DIVERGED";
+interface OutcomeVerificationBase extends SealedRecord<"cint/outcome-verification/1", VerificationDigest> {
   readonly target: string;
   readonly expected_sha256: TargetDigest;
   readonly actual_sha256: TargetDigest;
   readonly checked_at: CanonicalInstant;
 }
 
+export interface VerifiedOutcomeVerification extends OutcomeVerificationBase {
+  readonly status: "VERIFIED";
+}
+
+export interface DivergedOutcomeVerification extends OutcomeVerificationBase {
+  readonly status: "DIVERGED";
+}
+
+export type OutcomeVerification = VerifiedOutcomeVerification | DivergedOutcomeVerification;
+
 export interface RestoredRollback extends SealedRecord<"cint/rollback/1"> {
   readonly status: "RESTORED";
-  readonly restored_sha256: TargetDigest;
+  readonly target: string;
+  readonly expected_sha256: TargetDigest;
+  readonly actual_sha256: TargetDigest;
+  readonly rolled_back_at: CanonicalInstant;
 }
+
+export interface FailedRollback extends SealedRecord<"cint/rollback/1" | "cint/rollback-failure/1"> {
+  readonly status: "FAILED";
+}
+
+export type RollbackResult = RestoredRollback | FailedRollback;
 
 interface OutcomeBase extends SealedRecord<"cint/outcome/1", OutcomeDigest> {
   readonly receipt_id: ReceiptId;
@@ -314,7 +332,7 @@ interface OutcomeBase extends SealedRecord<"cint/outcome/1", OutcomeDigest> {
   readonly target_digest: TargetDigest;
   readonly execution_digest: ExecutionDigest;
   readonly verification_digest: VerificationDigest;
-  readonly final_state_digest: MachineStateDigest;
+  readonly final_state_digest: TargetDigest;
   readonly completed_at: CanonicalInstant;
 }
 
@@ -349,7 +367,7 @@ export interface EvidenceSeal extends SealedRecord<"cint/evidence-seal/1", Evide
 }
 
 interface ExecutionResultBase extends SealedRecord<"cint/execution-result/1"> {
-  readonly receipt_id: ReceiptId | null;
+  readonly receipt_id: string | null;
   readonly receipt_digest: ReceiptDigest | null;
   readonly consumption_digest: ConsumptionDigest | null;
   readonly revalidation_digest: RevalidationDigest | null;
@@ -368,14 +386,14 @@ export interface RolledBackExecutionResult extends ExecutionResultBase {
   readonly status: "ROLLED_BACK";
   readonly outcome: RestoredOutcome;
   readonly evidence_seal: EvidenceSeal;
-  readonly error_code: Identifier | null;
+  readonly error_code: string | null;
 }
 
 export interface FailedExecutionResult extends ExecutionResultBase {
   readonly status: "REPLAY_REJECTED" | "REJECTED" | "REVOKED" | "FAIL_CLOSED";
   readonly outcome: null;
   readonly evidence_seal: null;
-  readonly error_code: Identifier;
+  readonly error_code: string;
 }
 
 export type ExecutionResult = SealedExecutionResult | RolledBackExecutionResult | FailedExecutionResult;

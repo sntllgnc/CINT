@@ -22,7 +22,8 @@ export type InternalCintProtocol =
   | "cint/state-machine/1"
   | "cint/synthetic-execution/1"
   | "cint/codex-delegation-execution/1"
-  | "cint/execution-interruption/1";
+  | "cint/execution-interruption/1"
+  | "cint/execution-ledger/1";
 
 export type JsonPrimitive = null | boolean | number | string;
 export type JsonValue = JsonPrimitive | JsonObject | readonly JsonValue[];

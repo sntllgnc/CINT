@@ -249,7 +249,7 @@ export class FileReceiptStore {
       await unlink(paths.pending);
       return consumedEntry;
     } finally {
-      assertCint(lock !== undefined, "CINT_RECEIPT_LOCK_INVALID", "Receipt lock was not acquired");
+      assertCint(lock !== undefined, "CINT_RECEIPT_REPLAY_REJECTED", "Receipt lock was not acquired");
       await lock.close().catch(() => {});
       await unlink(paths.lock).catch(() => {});
     }
