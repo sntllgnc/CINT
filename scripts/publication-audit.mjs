@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const ignoredDirectories = new Set([".git", "node_modules"]);
+const ignoredDirectories = new Set([".git", ".test-dist", "dist", "node_modules"]);
 const ignoredPrefixes = ["artifacts/generated/"];
 const allowedDotfiles = new Set([".gitignore", ".node-version", ".npmrc", ".nvmrc"]);
 const allowedHiddenDirectories = new Set([".github"]);

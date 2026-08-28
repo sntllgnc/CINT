@@ -2,13 +2,22 @@
 import { spawnSync } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-import { CINT_SCHEMA_PROTOCOLS } from "../src/cint/schema.js";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const schemaDirectory = path.join(root, "schemas", "cint");
 const failures = [];
+
+const build = spawnSync(process.execPath, [path.join(root, "scripts", "build.mjs")], {
+  cwd: root,
+  stdio: "inherit"
+});
+if (build.status !== 0) failures.push({ code: "TYPESCRIPT_BUILD_FAILED", status: build.status });
+
+let CINT_SCHEMA_PROTOCOLS = [];
+if (build.status === 0) {
+  ({ CINT_SCHEMA_PROTOCOLS } = await import(pathToFileURL(path.join(root, "dist", "src", "cint", "schema.js")).href));
+}
 
 const directorySchemas = (await readdir(schemaDirectory))
   .filter((name) => name.endsWith(".schema.json"))
