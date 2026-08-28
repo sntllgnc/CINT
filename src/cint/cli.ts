@@ -7,11 +7,12 @@ export const CINT_IDENTITY = Object.freeze({
   tagline: "No consequential action without current authority.",
   mission: "Prevent silent or unauthorized intent from becoming machine action.",
   invariant: "No consequential action without current decision-bound authority.",
-  release_state: "PUBLIC_R0_SOURCE",
-  public_source_exposure: "YES",
-  public_default_product: "YES",
-  public_release: "YES",
-  remaining_publication_authority: "SOURCE_RELEASE_COMPLETE",
+  source_state: "R1_INTEGRATED_INTO_MAIN",
+  release_state: "R1_UNRELEASED",
+  latest_public_release: "v0.1.0-cint-r0",
+  package_version: "0.1.0-cint-r0",
+  package_private: "YES",
+  production_ready: "NO",
   adapters: Object.freeze([
     "cint.adapter.synthetic-file-patch",
     "cint.adapter.codex-delegation"
@@ -29,7 +30,7 @@ export function renderCintHelp(): string {
     "No consequential action without current authority.",
     "",
     "Commands:",
-    "  identity           Print the frozen CINT-R0 identity and authority state",
+    "  identity           Print the current CINT source and release state",
     "  schemas            List strict CINT protocol schemas",
     "  legacy <command>   Invoke the preserved Agent Floor Adapter 01 CLI"
   ].join("\n");

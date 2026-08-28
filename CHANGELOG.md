@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.2.0-cint-r1 — unreleased candidate
+## CINT R1 — integrated source, unreleased
 
 - Adopted Node.js 24 as the normative baseline, retained Node.js 22 as a
   temporary compatibility lane, and added Node.js 26 as a forward-compatibility
@@ -17,8 +17,10 @@
   `v0.1.0-cint-r0` with no normalized behavioral drift.
 - Added no Rust, WASM, Three.js, browser, web-framework, UI, runtime TypeScript,
   or publication dependency.
-- Kept package version `0.1.0-cint-r0`, package state private, and all release,
-  tag, merge, npm-publication, and deployment actions outside this candidate.
+- Integrated the R1 source into `main` while keeping package version
+  `0.1.0-cint-r0`, package state private, and `v0.1.0-cint-r0` as the latest
+  public release. No R1 tag, release, npm publication, deployment, or
+  production-readiness claim exists.
 
 ## v0.1.0-cint-r0 — 2026-08-28
 
