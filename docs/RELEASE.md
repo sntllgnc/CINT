@@ -45,10 +45,27 @@ release remain unchanged.
 The complete technical limitations and non-claims are maintained in
 [`docs/LIMITATIONS.md`](LIMITATIONS.md).
 
-## R1 successor candidate
+## R1 source integration and release separation
 
-The R1 TypeScript candidate is not part of the R0 release. At C2 acceptance on
-2026-08-28, its verified implementation head was
+The R1 TypeScript control plane entered `main` through PR #2 and merge commit
+`993ba4ce852eb43a36b2fe4395cdfed33756a7de`. Post-merge workflow
+[33179382085](https://github.com/sntllgnc/CINT/actions/runs/33179382085)
+passed all nine platform/runtime lanes and both aggregate checks at that exact
+commit.
+
+This is source integration, not release publication. The repository's default
+branch now contains the R1 TypeScript control plane, while all of the following
+remain unchanged:
+
+- package version: `0.1.0-cint-r0`;
+- package state: private;
+- latest CINT tag and prerelease: `v0.1.0-cint-r0`;
+- historical Agent Floor tag and release: `v0.1.0-af-g0`;
+- npm publication: absent;
+- production deployment authority: absent.
+
+At the earlier C2 acceptance gate on 2026-08-28, the verified implementation
+head was
 `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022`, and workflow
 [33175315187](https://github.com/sntllgnc/CINT/actions/runs/33175315187) had passed
 all nine platform/runtime lanes and both aggregate checks. PR #2 was open and
@@ -56,5 +73,5 @@ draft at C2 acceptance. That snapshot established
 `READY-FOR-CINT-R1-TYPESCRIPT-REVIEW`; it did not alter `main`, either release
 tag, the prerelease, npm, or deployment state.
 
-Live head, workflow, and review-readiness state are maintained on
-[PR #2](https://github.com/sntllgnc/CINT/pull/2) and its GitHub checks.
+The complete integration record is
+[`docs/cint-r1/11_MAIN_INTEGRATION.md`](cint-r1/11_MAIN_INTEGRATION.md).

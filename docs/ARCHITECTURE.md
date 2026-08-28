@@ -21,6 +21,30 @@ runtime controls: exact keys, one of the 13 unchanged JSON Schemas, canonical
 JSON, content digests, protocol checks, and the applicable HMAC and gate
 verification. Runtime schemas remain authoritative.
 
+The R1 source state entered `main` through merge commit
+`993ba4ce852eb43a36b2fe4395cdfed33756a7de`. Integration changes the default
+source architecture, not the release identity: the package remains private and
+versioned `0.1.0-cint-r0` until separate release authority exists.
+
+## Language ownership
+
+Repository language percentages are not trust percentages. GitHub Linguist
+counts maintained bytes across the core, the preserved adapter, verification
+tooling, CLIs, fixtures, and tests. At main integration it reported 59.6%
+TypeScript and 40.4% JavaScript.
+
+| Boundary | Ownership |
+|---|---|
+| `src/cint/**` | 29 strict TypeScript files and zero JavaScript source files; owns CINT decision, receipt, revalidation, execution, outcome, rollback, evidence, and seal logic |
+| `src/cint/adapters/codex/legacy-adapter-boundary.ts` | Typed, lazy boundary into Adapter 01; carries no authority-issuing operation |
+| `src/adapters/codex-delegation/**` and root compatibility modules | Preserved JavaScript Agent Floor implementation and compatibility exports |
+| `scripts/*.mjs` | JavaScript build-assurance and evidence tooling; cannot issue runtime authority |
+| Test surfaces | Strict TypeScript CINT suites plus JavaScript legacy and launcher regressions |
+
+JavaScript remains visible because it is maintained source. No Linguist override
+relabels or suppresses it. The complete ownership map is recorded in
+[`LANGUAGE-BOUNDARY.md`](LANGUAGE-BOUNDARY.md).
+
 ## Two assurance planes
 
 CINT keeps runtime authority and build assurance mechanically separate:
@@ -160,5 +184,19 @@ The branch was ready for TypeScript review, and PR #2 was open and draft at C2
 acceptance. `main` remained the R0 baseline, and no merge, release, package
 publication, framework migration, or deployment followed from that state.
 
-Live head, workflow, and review-readiness state are maintained on
-[PR #2](https://github.com/sntllgnc/CINT/pull/2) and its GitHub checks.
+That dated state remains historical. The later lifecycle transition is
+established by PR #2's merge record, the exact merge commit, and the post-merge
+checks below.
+
+## Main integration — 2026-08-28
+
+PR #2 merged by a true merge commit with parents `acc857b5d6fa…` and
+`b89c263acece…`. The resulting `main` head was `993ba4ce852e…`. Post-merge run
+[33179382085](https://github.com/sntllgnc/CINT/actions/runs/33179382085)
+re-executed all nine platform/runtime lanes and both aggregate checks at that
+exact merge commit; every check passed.
+
+The integration changes no authority sequence described above. It creates no
+release, package publication, deployment, framework migration, or production
+claim. The immutable integration receipt is
+[`docs/cint-r1/11_MAIN_INTEGRATION.md`](cint-r1/11_MAIN_INTEGRATION.md).
