@@ -40,16 +40,19 @@ and seal controls.
 The package remains private and versioned `0.1.0-cint-r0`. R1 grants no merge,
 tag, release, npm-publication, or production-deployment authority.
 
-The current R1 review state is:
+The following table records the C2 acceptance snapshot from 2026-08-28:
 
 | Field | Verified value |
 |---|---|
 | Branch | `cint-r1-typescript` |
 | Verified C2 implementation head | `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022` |
 | Required parent | `42465b0192d167f419e782674fd4675c4049e4d9` |
-| Pull request | [#2](https://github.com/sntllgnc/CINT/pull/2), open and draft |
-| Qualifying workflow | [33175315187](https://github.com/sntllgnc/CINT/actions/runs/33175315187), nine lanes plus both aggregates passed |
+| Pull request at C2 acceptance | [#2](https://github.com/sntllgnc/CINT/pull/2); it was open and draft at C2 acceptance |
+| Qualifying C2 workflow | [33175315187](https://github.com/sntllgnc/CINT/actions/runs/33175315187); nine lanes plus both aggregates passed |
 | Terminal | `READY-FOR-CINT-R1-TYPESCRIPT-REVIEW` |
+
+Live head, workflow, and review-readiness state are maintained on
+[PR #2](https://github.com/sntllgnc/CINT/pull/2) and its GitHub checks.
 
 The C2 correction changes only package-verification process launch. It prefers
 the active Node executable plus npm's CLI path, uses bounded platform fallbacks

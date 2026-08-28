@@ -16,11 +16,15 @@ typescript   7.0.2
 
 Neither package is a runtime dependency.
 
-The verified C2 implementation candidate is `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022`
-on `cint-r1-typescript`. It preserves the C1 parent
-`42465b0192d167f419e782674fd4675c4049e4d9` and has the terminal state
-`READY-FOR-CINT-R1-TYPESCRIPT-REVIEW`. PR #2 remains open and draft; this is a
-reviewable branch state, not a merge or release state.
+At C2 acceptance on 2026-08-28, the verified implementation candidate was
+`97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022` on `cint-r1-typescript`. It preserved
+the C1 parent `42465b0192d167f419e782674fd4675c4049e4d9` and established the
+terminal state `READY-FOR-CINT-R1-TYPESCRIPT-REVIEW`. PR #2 was open and draft
+at C2 acceptance; that was a reviewable branch state, not a merge or release
+state.
+
+Live head, workflow, and review-readiness state are maintained on
+[PR #2](https://github.com/sntllgnc/CINT/pull/2) and its GitHub checks.
 
 ## Compiler policy
 

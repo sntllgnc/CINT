@@ -151,11 +151,14 @@ under `src/adapters/codex-delegation/`. Root module re-exports and the
 historical tag and evidence manifest remain the source of immutable release
 identity.
 
-## Current R1 review boundary
+## C2 acceptance snapshot — 2026-08-28
 
-The reviewed candidate head is `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022`.
-Workflow `33175315187` passed Linux, macOS, and Windows on Node.js 22, 24,
-and 26, plus both aggregate checks. The branch is ready for TypeScript review;
-PR #2 remains draft, `main` remains the R0 baseline, and no merge, release,
-package publication, framework migration, or deployment follows from this
-state.
+At C2 acceptance, the reviewed candidate head was
+`97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022`. Workflow `33175315187` had passed
+Linux, macOS, and Windows on Node.js 22, 24, and 26, plus both aggregate checks.
+The branch was ready for TypeScript review, and PR #2 was open and draft at C2
+acceptance. `main` remained the R0 baseline, and no merge, release, package
+publication, framework migration, or deployment followed from that state.
+
+Live head, workflow, and review-readiness state are maintained on
+[PR #2](https://github.com/sntllgnc/CINT/pull/2) and its GitHub checks.

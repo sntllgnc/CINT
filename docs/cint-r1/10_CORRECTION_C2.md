@@ -3,7 +3,7 @@
 This record supersedes no historical gate document. It appends the final
 package-launch correction state to the R1 candidate lineage.
 
-## State ledger
+## C2 acceptance snapshot — 2026-08-28
 
 | Field | Value |
 |---|---|
@@ -13,13 +13,16 @@ package-launch correction state to the R1 candidate lineage.
 | Pre-C1 candidate | `4338955d41749146da36f714a0e0182b9f4bb32e` |
 | C1 | `42465b0192d167f419e782674fd4675c4049e4d9` |
 | C2 | `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022` |
-| Pull request | [#2](https://github.com/sntllgnc/CINT/pull/2), open and draft |
+| Pull request at C2 acceptance | [#2](https://github.com/sntllgnc/CINT/pull/2); it was open and draft at C2 acceptance |
 | Nonqualifying C1 run | `33173883181`, preserved and not rerun |
 | Qualifying C2 run | [33175315187](https://github.com/sntllgnc/CINT/actions/runs/33175315187) |
 | Terminal | `READY-FOR-CINT-R1-TYPESCRIPT-REVIEW` |
 
-The terminal means the branch satisfies the bounded TypeScript review gate. It
-does not mean merged, released, published, deployed, or production-ready.
+At C2 acceptance, the terminal meant the branch satisfied the bounded
+TypeScript review gate. It did not mean merged, released, published, deployed,
+or production-ready. Live head, workflow, and review-readiness state are
+maintained on [PR #2](https://github.com/sntllgnc/CINT/pull/2) and its GitHub
+checks.
 
 ## Corrected contradiction
 
