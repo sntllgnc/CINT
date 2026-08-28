@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
-  <title id="title">Agent Floor governed delegation architecture</title>
+  <title id="title">Historical Agent Floor governed delegation architecture</title>
   <desc id="desc">A root task passes through policy validation into a clean packet and read-only source projection. An ephemeral bounded Codex child returns request-local usage and schema-constrained evidence to a parent admission gate.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">

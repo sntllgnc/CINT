@@ -1,0 +1,16 @@
+{
+  "gate": "CINT-R0.G3",
+  "status": "PASS",
+  "cint_contract_tests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "legacy_and_adapter_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "strict_schemas": 6,
+  "decision_states": ["ADMIT", "DENY", "REVIEW"],
+  "decision_execution_authority": "NONE",
+  "evidence": "docs/cint-r0/03_DECISION_CONTRACTS.md"
+}

@@ -1,27 +1,46 @@
-# Release v0.1.0-af-g0
+# SI1 CINT v0.1.0 — R0 source release
 
-## Gate
+## Identity
 
-AF-G0 — Governed Child Execution: PASS.
+| Field | Value |
+|---|---|
+| Product code | CINT |
+| Public display | SI1 CINT |
+| Repository | `sntllgnc/CINT` |
+| Default branch | `main` |
+| Release | `v0.1.0-cint-r0` |
+| Historical baseline | `v0.1.0-af-g0` |
+| Accepted architecture | `1343b88e1b95c8e299a8bfa7d3b0786d8347c8c4` |
+| Trusted-time correction | `ae3502779c97ae44464714fea25e1868d5ecaa1d` |
+| State | Public R0 source and verification baseline |
+| Production readiness | Not claimed |
+| npm publication | Not performed |
 
-## Deterministic proof
+## R0 contents
 
-- 14 automated tests pass.
-- Full-history delegation is rejected before execution.
-- The fixture reproduces 555,300,000 raw cumulative tokens.
-- Verified request-local usage is 1,492,621 tokens.
-- The correction removes 553,807,379 tokens of false attribution, a 372.03× difference.
-- Valid evidence is admitted.
-- A contradictory conclusion using the same valid citations is rejected.
+- strict canonical contracts and runtime enforcement of all 13 public schemas;
+- principal, authority, policy, challenge, and decision engine;
+- signed action-bound one-shot receipts;
+- atomic consumption, replay rejection, expiry, and revocation;
+- receipt-locked, pre-preparation, and execution-bound revalidation with
+  fail-closed dependency preflight;
+- synthetic action, verification, interrupt, rollback, ledger, and seal;
+- preserved Agent Floor foundation as Codex Adapter 01;
+- gate-by-gate commits and sanitized evidence artifacts.
 
-## Native proof
+## Remote verification
 
-The redacted native smoke records a clean GPT-5.6 Terra child, one model call, two monitored cycles, 19,417 incremental tokens, and an admitted result. Raw native logs are excluded.
+Every protected `main` update must pass `CINT-R0 remote verification`. The aggregate
+gate covers the complete verification command and the 13-schema package check
+on Linux, macOS, and Windows across Node.js 20, 24, and 26.
 
-## Security posture
+## Release boundary
 
-The release adds a process-environment allowlist, worker-shell secret-name exclusions, a temporary allowlisted source projection, read-only child execution, source-drift checking, and a public package scan.
+`v0.1.0-cint-r0` is the public source prerelease. It does not claim production
+readiness and does not publish `@sntllgnc/cint` to npm. It grants no authority
+for production deployment, third-party operational reliance, media action, or
+physical autonomous action. The historical `v0.1.0-af-g0` tag and Agent Floor
+release remain unchanged.
 
-## Non-claims
-
-This release audits request-local telemetry. It does not calculate an invoice, reconcile account billing, explain a provider quota decision, or provide hostile-code containment.
+The complete technical limitations and non-claims are maintained in
+[`docs/LIMITATIONS.md`](LIMITATIONS.md).

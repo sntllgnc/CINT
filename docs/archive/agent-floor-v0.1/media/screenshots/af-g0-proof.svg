@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="360" viewBox="0 0 1000 360" role="img" aria-labelledby="proof-title proof-desc">
-  <title id="proof-title">AF-G0 deterministic proof summary</title>
+  <title id="proof-title">Historical AF-G0 deterministic proof summary</title>
   <desc id="proof-desc">The raw cumulative attribution is 555.3 million tokens, verified request-local usage is 1,492,621 tokens, and the correction removes 553,807,379 tokens of false attribution.</desc>
   <rect width="1000" height="360" rx="18" fill="#0d1117"/>
   <text x="48" y="58" fill="#f0f6fc" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="26">AF-G0 — GOVERNED CHILD EXECUTION</text>

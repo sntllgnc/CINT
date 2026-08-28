@@ -1,21 +1,44 @@
 {
-  "name": "agent-floor",
-  "version": "0.1.0",
-  "description": "Bounded Codex child execution with request-local usage and evidence admission.",
+  "name": "@sntllgnc/cint",
+  "version": "0.1.0-cint-r0",
+  "description": "SI1 CINT — Machine Counterintelligence Runtime for decision-bound consequential action.",
   "type": "module",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sntllgnc/CINT.git"
+  },
+  "homepage": "https://github.com/sntllgnc/CINT#readme",
+  "bugs": {
+    "url": "https://github.com/sntllgnc/CINT/issues"
+  },
   "bin": {
+    "cint": "./bin/cint.js",
     "agent-floor": "./bin/agent-floor.js"
   },
+  "exports": {
+    ".": "./src/cint/index.js",
+    "./cli": "./src/cint/cli.js",
+    "./adapters/synthetic-file-patch": "./src/cint/adapters/synthetic-file-patch.js",
+    "./adapters/codex-delegation": "./src/cint/adapters/codex/index.js"
+  },
   "scripts": {
+    "cint:identity": "node ./bin/cint.js identity",
+    "cint:test": "node --test ./tests/cint-*.test.js",
     "demo": "node ./bin/agent-floor.js demo",
     "doctor": "node ./bin/agent-floor.js doctor",
-    "test": "node --test ./tests/*.test.js",
+    "test": "node --test",
+    "schema:verify": "node ./scripts/verify-cint-schema-package.mjs",
     "public:audit": "node ./scripts/publication-audit.mjs",
-    "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs"
+    "evidence:verify": "node ./scripts/verify-evidence-manifest.mjs",
+    "verify": "npm test && npm run demo && npm audit && npm run public:audit && npm run evidence:verify"
   },
   "engines": {
     "node": ">=20"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
+  }
 }

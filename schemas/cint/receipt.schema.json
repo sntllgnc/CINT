@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/receipt-1.json",
+  "title": "CINT one-shot decision receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "id",
+    "issuer_id",
+    "decision_id",
+    "decision_digest",
+    "status",
+    "issued_at",
+    "expires_at",
+    "nonce",
+    "binding",
+    "binding_digest",
+    "signature_algorithm",
+    "signature",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/decision-receipt/1" },
+    "id": { "$ref": "#/$defs/id" },
+    "issuer_id": { "$ref": "#/$defs/id" },
+    "decision_id": { "$ref": "#/$defs/id" },
+    "decision_digest": { "$ref": "#/$defs/sha256" },
+    "status": { "const": "ISSUED" },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "nonce": { "type": "string", "minLength": 16, "maxLength": 128 },
+    "binding": { "$ref": "https://cint.invalid/schema/decision-1.json#/properties/binding" },
+    "binding_digest": { "$ref": "#/$defs/sha256" },
+    "signature_algorithm": { "const": "HMAC-SHA256" },
+    "signature": { "$ref": "#/$defs/sha256" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

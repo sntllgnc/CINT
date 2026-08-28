@@ -42,7 +42,12 @@ test("one command creates and audits a clean bounded child process", async () =>
   await chmod(mock, 0o755);
   try {
     const { spec } = await loadTaskSpec(DEMO_SPEC);
-    const record = await runGovernedChild({ spec, outputDir: temporary, codexBinary: mock });
+    const record = await runGovernedChild({
+      spec,
+      outputDir: temporary,
+      codexBinary: process.execPath,
+      codexArgs: [mock]
+    });
     assert.equal(record.context_enforcement.process_boundary, true);
     assert.equal(record.context_enforcement.inherited_turns, 0);
     assert.equal(record.context_enforcement.multi_agent_tools, "disabled");

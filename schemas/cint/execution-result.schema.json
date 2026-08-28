@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/execution-result-1.json",
+  "title": "CINT execution result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "status",
+    "receipt_id",
+    "receipt_digest",
+    "consumption_digest",
+    "revalidation_digest",
+    "action_started",
+    "outcome",
+    "evidence_seal",
+    "error_code",
+    "completed_at",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/execution-result/1" },
+    "status": { "enum": ["SEALED", "ROLLED_BACK", "REPLAY_REJECTED", "REJECTED", "REVOKED", "FAIL_CLOSED"] },
+    "receipt_id": { "type": ["string", "null"] },
+    "receipt_digest": { "$ref": "#/$defs/nullableSha256" },
+    "consumption_digest": { "$ref": "#/$defs/nullableSha256" },
+    "revalidation_digest": { "$ref": "#/$defs/nullableSha256" },
+    "action_started": { "type": "boolean" },
+    "outcome": { "oneOf": [{ "$ref": "https://cint.invalid/schema/outcome-1.json" }, { "type": "null" }] },
+    "evidence_seal": { "oneOf": [{ "$ref": "https://cint.invalid/schema/seal-1.json" }, { "type": "null" }] },
+    "error_code": { "type": ["string", "null"] },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nullableSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "protocol": "cint/gate-ledger/1",
+  "baseline": {
+    "commit": "d57a80404e04d2c376cba9cc4b3fc06a5d8c8c49",
+    "tag": "v0.1.0-af-g0"
+  },
+  "gates": [
+    {
+      "gate": "CINT-R0.G0",
+      "name": "Historical baseline freeze",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/00_BASELINE_SEAL.md"
+    },
+    {
+      "gate": "CINT-R0.G1",
+      "name": "Preservation map and archive plan",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/01_FOUNDATION_RECONCILIATION.md"
+    },
+    {
+      "gate": "CINT-R0.G2",
+      "name": "Module extraction with behavioral equivalence",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/02_LEGACY_EXTRACTION.md"
+    },
+    {
+      "gate": "CINT-R0.G3",
+      "name": "CINT contracts and decision engine",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/03_DECISION_CONTRACTS.md"
+    },
+    {
+      "gate": "CINT-R0.G4",
+      "name": "Receipt and atomic one-shot consumption",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/04_DECISION_RECEIPTS.md"
+    },
+    {
+      "gate": "CINT-R0.G5",
+      "name": "Synthetic gated execution and rollback",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/05_SYNTHETIC_ACTION_PROOF.md"
+    },
+    {
+      "gate": "CINT-R0.G6",
+      "name": "Legacy Codex adapter admission",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/06_CODEX_ADAPTER.md"
+    },
+    {
+      "gate": "CINT-R0.G7",
+      "name": "Documentation and technology reassembly",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/07_DOCUMENTATION_REASSEMBLY.md"
+    },
+    {
+      "gate": "CINT-R0.G8",
+      "name": "Independent clean verification",
+      "status": "PASS",
+      "evidence": "docs/cint-r0/08_TERMINAL_VERDICT.md"
+    }
+  ],
+  "terminal_verdict": "READY-FOR-CINT-REVIEW"
+}

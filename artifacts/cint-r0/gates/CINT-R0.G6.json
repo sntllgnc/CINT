@@ -1,0 +1,19 @@
+{
+  "gate": "CINT-R0.G6",
+  "status": "PASS",
+  "codex_adapter_tests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "prior_tests": {
+    "passed": 48,
+    "failed": 0
+  },
+  "legacy_adapter": "CINT Adapter 01",
+  "legacy_result_authority": "EVIDENCE_ONLY",
+  "cint_authority_methods_exposed": 0,
+  "packet_drift": "REJECTED_BEFORE_EXECUTION",
+  "mock_backed_cint_outcome": "SEALED",
+  "external_mutations": 0,
+  "evidence": "docs/cint-r0/06_CODEX_ADAPTER.md"
+}

@@ -1,0 +1,32 @@
+{
+  "gate": "CINT-R0.G8",
+  "status": "PASS",
+  "verification_source": "independent-detached-clean-worktree",
+  "tests": {
+    "total": 53,
+    "passed": 53,
+    "failed": 0
+  },
+  "schemas": 11,
+  "threat_model_source_citations": 38,
+  "active_documents": 10,
+  "readme_local_links": 13,
+  "npm_audit_vulnerabilities": 0,
+  "publication_audit": {
+    "verdict": "PASS",
+    "findings": 0
+  },
+  "historical_evidence": {
+    "verdict": "PASS",
+    "entries": 53,
+    "verification_source": "immutable-git-release"
+  },
+  "package_dry_run": {
+    "name": "si1-cint",
+    "verdict": "PASS"
+  },
+  "worktree": "CLEAN",
+  "remote_mutations": 0,
+  "public_actions": 0,
+  "evidence": "docs/cint-r0/08_TERMINAL_VERDICT.md"
+}

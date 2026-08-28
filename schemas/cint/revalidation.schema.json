@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/revalidation-1.json",
+  "title": "CINT immediate revalidation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol", "receipt_id", "status", "checked_at", "binding_digest", "current", "reason_codes", "digest"],
+  "properties": {
+    "protocol": { "const": "cint/revalidation/1" },
+    "receipt_id": { "$ref": "#/$defs/id" },
+    "status": { "enum": ["VALID", "REVOKED", "REJECTED", "FAIL_CLOSED"] },
+    "checked_at": { "type": "string", "format": "date-time" },
+    "binding_digest": { "$ref": "#/$defs/sha256" },
+    "current": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intent_digest",
+        "action_digest",
+        "target_digest",
+        "context_digest",
+        "principal_digest",
+        "authority_digest",
+        "authority_epoch",
+        "policy_digest",
+        "policy_epoch",
+        "adapter_capability_digest",
+        "machine_state_digest",
+        "machine_state_epoch"
+      ],
+      "properties": {
+        "intent_digest": { "$ref": "#/$defs/nullableSha256" },
+        "action_digest": { "$ref": "#/$defs/nullableSha256" },
+        "target_digest": { "$ref": "#/$defs/nullableSha256" },
+        "context_digest": { "$ref": "#/$defs/nullableSha256" },
+        "principal_digest": { "$ref": "#/$defs/nullableSha256" },
+        "authority_digest": { "$ref": "#/$defs/nullableSha256" },
+        "authority_epoch": { "type": ["integer", "null"], "minimum": 1 },
+        "policy_digest": { "$ref": "#/$defs/nullableSha256" },
+        "policy_epoch": { "type": ["integer", "null"], "minimum": 1 },
+        "adapter_capability_digest": { "$ref": "#/$defs/nullableSha256" },
+        "machine_state_digest": { "$ref": "#/$defs/nullableSha256" },
+        "machine_state_epoch": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "reason_codes": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nullableSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" }
+  }
+}

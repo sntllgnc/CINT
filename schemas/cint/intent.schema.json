@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/intent-1.json",
+  "title": "CINT intent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "id",
+    "principal_id",
+    "request",
+    "action",
+    "declared_effects",
+    "context",
+    "uncertainties",
+    "created_at",
+    "action_digest",
+    "target_digest",
+    "context_digest",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/intent/1" },
+    "id": { "$ref": "#/$defs/id" },
+    "principal_id": { "$ref": "#/$defs/id" },
+    "request": { "type": ["string", "null"], "minLength": 1 },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter", "type", "target", "parameters", "consequence"],
+      "properties": {
+        "adapter": { "$ref": "#/$defs/id" },
+        "type": { "$ref": "#/$defs/id" },
+        "target": {},
+        "parameters": {},
+        "consequence": { "enum": ["READ_ONLY", "CONSEQUENTIAL"] }
+      }
+    },
+    "declared_effects": { "type": "array", "maxItems": 32, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "context": {},
+    "uncertainties": { "type": "array", "maxItems": 16, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "created_at": { "type": "string", "format": "date-time" },
+    "action_digest": { "$ref": "#/$defs/sha256" },
+    "target_digest": { "$ref": "#/$defs/sha256" },
+    "context_digest": { "$ref": "#/$defs/sha256" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

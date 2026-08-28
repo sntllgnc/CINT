@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/policy-1.json",
+  "title": "CINT policy snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "id",
+    "version",
+    "status",
+    "epoch",
+    "allowed_adapters",
+    "allowed_action_types",
+    "denied_action_types",
+    "require_explicit_request",
+    "require_declared_effects",
+    "require_rollback_for_consequential",
+    "review_on_uncertainty",
+    "issued_at",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/policy/1" },
+    "id": { "$ref": "#/$defs/id" },
+    "version": { "$ref": "#/$defs/id" },
+    "status": { "const": "ACTIVE" },
+    "epoch": { "type": "integer", "minimum": 1 },
+    "allowed_adapters": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+    "allowed_action_types": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+    "denied_action_types": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+    "require_explicit_request": { "type": "boolean" },
+    "require_declared_effects": { "type": "boolean" },
+    "require_rollback_for_consequential": { "type": "boolean" },
+    "review_on_uncertainty": { "type": "boolean" },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

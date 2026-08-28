@@ -1,21 +1,41 @@
-# Privacy model
+# CINT privacy model
 
-## Deterministic demonstration
+CINT-R0 operates locally. Canonical receipts, consumption records, revalidation
+records, ledger entries, outcomes, and seals contain identifiers, digests,
+epochs, statuses, reason codes, timestamps, and aggregate adapter evidence. They
+do not contain receipt keys, seal keys, absolute adapter paths, original
+synthetic bytes, or complete Codex event streams.
 
-`npm run demo` uses sanitized local fixtures. It makes no model call, requires no Codex authentication, and reads no private repository.
+## Sensitive local material
 
-## Live worker
+The embedding process controls:
 
-A native run uses the locally installed Codex command and its configured provider. The bounded packet and allowlisted source content may enter model requests. Agent Floor does not automatically send the entire repository.
+- principal attributes and explicit request text;
+- action parameters and target descriptions;
+- receipt and seal keys;
+- receipt-store and ledger locations;
+- Codex task packets, allowlisted source content, model output, event JSONL,
+  stderr, and evidence directories;
+- any external policy or machine-state source used during revalidation.
 
-## Environment handling
+These surfaces remain local unless the operator separately authorizes transfer.
+Evidence seals prove digest relationships; they do not make the underlying
+material safe to disclose.
 
-The Codex process receives a small runtime allowlist rather than the complete parent environment. Worker shells retain default filtering and add exclusions for common secret-bearing names. Operators can explicitly extend the process allowlist; doing so transfers responsibility for those variables to the operator.
+## Adapter-specific boundaries
 
-## Local run records
+The synthetic adapter retains original bytes only in process memory long enough
+to restore a failed or interrupted action. Execution and rollback records expose
+hashes and byte counts, not content or absolute paths.
 
-The selected output directory may contain packet text, source hashes, model event JSONL, stderr diagnostics, cited excerpts, worker conclusions, usage fields, command metadata, and timestamps. Agent Floor does not promise automatic redaction of native run records. Review them before sharing or archiving.
+The Codex adapter inherits the Agent Floor privacy boundary: only allowlisted
+files enter the temporary child projection, but the bounded packet and selected
+source content may enter the configured model request. Raw native output remains
+sensitive and is written only to the caller-selected local evidence directory.
 
-## Public evidence
+## Public-tree controls
 
-The repository contains only synthetic source files, sanitized telemetry-shaped fixtures, and redacted summaries. It contains no authentication file, raw private rollout, local absolute path, private source repository, cookie, bearer token, API key, account email, or user biometric.
+The repository publication audit rejects absolute local paths, common credential
+formats, email addresses, session identifiers, hidden metadata, raw logs outside
+the sanitized historical fixture, and non-public project names. Public material
+uses only sanitized stage outcomes and local proof counts.

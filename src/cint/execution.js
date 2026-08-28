@@ -1,0 +1,362 @@
+import { randomUUID } from "node:crypto";
+
+import {
+  assertCint,
+  assertExactKeys,
+  isoInstant,
+  sealRecord,
+  verifyProtocolRecord,
+  verifySealedRecord
+} from "./canonical.js";
+import { createOutcome } from "./outcome.js";
+import { revalidateReceipt } from "./revalidation.js";
+import { performRollback } from "./rollback.js";
+
+function eventId(type) {
+  return `event.${type.toLowerCase()}.${randomUUID()}`;
+}
+
+function trustedExecutionTime(clock) {
+  return isoInstant(clock.now(), "trusted execution time");
+}
+
+function availableExecutionRuntime(input) {
+  try {
+    verifyProtocolRecord(input.adapter?.capability, "cint/adapter-capability/1", "adapter capability");
+  } catch {
+    return false;
+  }
+  const capability = input.adapter.capability;
+  return (
+    typeof input.snapshot_provider === "function" &&
+    input.clock?.now instanceof Function &&
+    input.receipt_authority?.verify instanceof Function &&
+    input.store?.consume instanceof Function &&
+    typeof input.adapter?.id === "string" &&
+    input.adapter.id === capability.id &&
+    capability.prepare_side_effect_free === true &&
+    capability.outcome_verification === true &&
+    input.adapter.prepare instanceof Function &&
+    input.adapter.execute instanceof Function &&
+    input.adapter.verify instanceof Function &&
+    (capability.rollback !== true || input.adapter.rollback instanceof Function) &&
+    input.seal_authority?.issue instanceof Function &&
+    input.seal_authority?.verify instanceof Function &&
+    input.ledger?.record instanceof Function
+  );
+}
+
+function failureResult({ receipt, status, code, at, consumption = null, revalidation = null, actionStarted = false }) {
+  return sealRecord({
+    protocol: "cint/execution-result/1",
+    status,
+    receipt_id: receipt?.id ?? null,
+    receipt_digest: receipt?.digest ?? null,
+    consumption_digest: consumption?.digest ?? null,
+    revalidation_digest: revalidation?.digest ?? null,
+    action_started: actionStarted,
+    outcome: null,
+    evidence_seal: null,
+    error_code: code,
+    completed_at: at
+  });
+}
+
+function statusForError(error, revalidation) {
+  if (error?.code === "CINT_RECEIPT_REPLAY_REJECTED") return "REPLAY_REJECTED";
+  if (revalidation?.status === "REJECTED") return "REJECTED";
+  if (revalidation?.status === "REVOKED" || error?.code === "CINT_RECEIPT_REVOKED") return "REVOKED";
+  return "FAIL_CLOSED";
+}
+
+async function record(ledger, type, at, payload) {
+  return ledger.record({ event_id: eventId(type), type, at, payload });
+}
+
+async function sealedResult({
+  input,
+  consumption,
+  revalidation,
+  outcome,
+  status,
+  at,
+  errorCode = null,
+  actionStarted = true
+}) {
+  const outcomeEvent = await record(input.ledger, `OUTCOME_${outcome.status}`, at, {
+    receipt_digest: input.receipt.digest,
+    outcome_digest: outcome.digest
+  });
+  const seal = input.seal_authority.issue({
+    receipt: input.receipt,
+    consumption,
+    revalidation,
+    outcome,
+    ledger_head: outcomeEvent,
+    issued_at: at
+  });
+  input.seal_authority.verify(seal);
+  return sealRecord({
+    protocol: "cint/execution-result/1",
+    status,
+    receipt_id: input.receipt.id,
+    receipt_digest: input.receipt.digest,
+    consumption_digest: consumption.digest,
+    revalidation_digest: revalidation.digest,
+    action_started: actionStarted,
+    outcome,
+    evidence_seal: seal,
+    error_code: errorCode,
+    completed_at: at
+  });
+}
+
+export async function executeWithReceipt(input) {
+  assertExactKeys(
+    input,
+    [
+      "receipt",
+      "receipt_authority",
+      "store",
+      "snapshot_provider",
+      "clock",
+      "adapter",
+      "seal_authority",
+      "ledger",
+      "at"
+    ],
+    ["signal"],
+    "execution request"
+  );
+  const at = isoInstant(input.at, "execution time");
+  if (!availableExecutionRuntime(input)) {
+    return failureResult({
+      receipt: input.receipt,
+      status: "FAIL_CLOSED",
+      code: "CINT_UNAVAILABLE",
+      at,
+      actionStarted: false
+    });
+  }
+  try {
+    verifyProtocolRecord(input.receipt, "cint/decision-receipt/1", "receipt");
+  } catch (error) {
+    return failureResult({
+      receipt: input.receipt,
+      status: "REJECTED",
+      code: error.code ?? "CINT_RECEIPT_INVALID",
+      at,
+      actionStarted: false
+    });
+  }
+
+  let lockedSnapshot = null;
+  let consumption = null;
+  let revalidation = null;
+  try {
+    input.receipt_authority.verify(input.receipt, { now: at });
+    await record(input.ledger, "RECEIPT_PRESENTED", at, { receipt_digest: input.receipt.digest });
+    consumption = await input.store.consume(input.receipt, {
+      consumed_at: at,
+      revalidate: async () => {
+        lockedSnapshot = await input.snapshot_provider();
+        revalidation = revalidateReceipt({
+          receipt: input.receipt,
+          receipt_authority: input.receipt_authority,
+          ...lockedSnapshot,
+          now: at
+        });
+        return revalidation;
+      }
+    });
+    await record(input.ledger, "RECEIPT_CONSUMED", at, {
+      receipt_digest: input.receipt.digest,
+      consumption_digest: consumption.digest,
+      revalidation_digest: revalidation.digest
+    });
+  } catch (error) {
+    return failureResult({
+      receipt: input.receipt,
+      status: statusForError(error, revalidation),
+      code: error.code ?? "CINT_FAIL_CLOSED",
+      at,
+      consumption,
+      revalidation,
+      actionStarted: false
+    });
+  }
+
+  let currentSnapshot;
+  try {
+    currentSnapshot = await input.snapshot_provider();
+    revalidation = revalidateReceipt({
+      receipt: input.receipt,
+      receipt_authority: input.receipt_authority,
+      ...currentSnapshot,
+      now: at
+    });
+    if (revalidation.status !== "VALID") {
+      return failureResult({
+        receipt: input.receipt,
+        status: statusForError(null, revalidation),
+        code: revalidation.reason_codes[0] ?? "CINT_REVALIDATION_FAILED",
+        at,
+        consumption,
+        revalidation,
+        actionStarted: false
+      });
+    }
+    assertCint(
+      input.adapter.id === currentSnapshot.adapter_capability.id &&
+        input.adapter.capability.digest === currentSnapshot.adapter_capability.digest,
+      "CINT_ADAPTER_MISMATCH",
+      "Runtime adapter does not match the current capability"
+    );
+    await record(input.ledger, "EXECUTION_REVALIDATED", at, {
+      receipt_digest: input.receipt.digest,
+      revalidation_digest: revalidation.digest
+    });
+  } catch (error) {
+    return failureResult({
+      receipt: input.receipt,
+      status: "FAIL_CLOSED",
+      code: error.code ?? "CINT_FAIL_CLOSED",
+      at,
+      consumption,
+      revalidation,
+      actionStarted: false
+    });
+  }
+
+  let prepared = null;
+  let execution = null;
+  let actionStarted = false;
+  let executionAt = at;
+  try {
+    prepared = await input.adapter.prepare(currentSnapshot.intent, { at, signal: input.signal });
+    await record(input.ledger, "EXECUTION_PREPARED", at, {
+      receipt_digest: input.receipt.digest,
+      action_digest: currentSnapshot.intent.action_digest,
+      target_digest: currentSnapshot.intent.target_digest
+    });
+
+    currentSnapshot = await input.snapshot_provider();
+    executionAt = trustedExecutionTime(input.clock);
+    revalidation = revalidateReceipt({
+      receipt: input.receipt,
+      receipt_authority: input.receipt_authority,
+      ...currentSnapshot,
+      now: executionAt
+    });
+    if (revalidation.status !== "VALID") {
+      return failureResult({
+        receipt: input.receipt,
+        status: statusForError(null, revalidation),
+        code: revalidation.reason_codes[0] ?? "CINT_REVALIDATION_FAILED",
+        at: executionAt,
+        consumption,
+        revalidation,
+        actionStarted: false
+      });
+    }
+    assertCint(
+      input.adapter.id === currentSnapshot.adapter_capability.id &&
+        input.adapter.capability.digest === currentSnapshot.adapter_capability.digest,
+      "CINT_ADAPTER_MISMATCH",
+      "Runtime adapter does not match the execution-bound capability"
+    );
+    actionStarted = true;
+    execution = await input.adapter.execute(prepared, { at: executionAt, signal: input.signal });
+    verifySealedRecord(execution, "adapter execution");
+    await record(input.ledger, "EXECUTION_COMPLETED", executionAt, {
+      receipt_digest: input.receipt.digest,
+      execution_digest: execution.digest,
+      revalidation_digest: revalidation.digest
+    });
+    const verification = await input.adapter.verify(prepared, execution, { at: executionAt, signal: input.signal });
+    verifySealedRecord(verification, "outcome verification");
+    if (verification.status === "VERIFIED") {
+      const outcome = createOutcome({
+        receipt: input.receipt,
+        execution,
+        verification,
+        rollback: null,
+        completed_at: executionAt
+      });
+      return await sealedResult({ input, consumption, revalidation, outcome, status: "SEALED", at: executionAt });
+    }
+    const rollback = await performRollback(input.adapter, prepared, { at: executionAt, signal: input.signal });
+    assertCint(rollback.status === "RESTORED", "CINT_ROLLBACK_FAILED", "Divergent outcome could not be restored");
+    const outcome = createOutcome({
+      receipt: input.receipt,
+      execution,
+      verification,
+      rollback,
+      completed_at: executionAt
+    });
+    return await sealedResult({ input, consumption, revalidation, outcome, status: "ROLLED_BACK", at: executionAt });
+  } catch (error) {
+    if (prepared && actionStarted) {
+      const interruptedExecution = execution ?? sealRecord({
+        protocol: "cint/execution-interruption/1",
+        status: "INTERRUPTED",
+        error_code: error.code ?? "CINT_EXECUTION_FAILED",
+        interrupted_at: executionAt
+      });
+      let verification;
+      try {
+        verification = await input.adapter.verify(prepared, interruptedExecution, { at: executionAt, signal: input.signal });
+        verifySealedRecord(verification, "outcome verification");
+      } catch {
+        verification = sealRecord({
+          protocol: "cint/outcome-verification/1",
+          status: "DIVERGED",
+          target: "unknown",
+          expected_sha256: prepared.after_sha256 ?? "0".repeat(64),
+          actual_sha256: "0".repeat(64),
+          checked_at: executionAt
+        });
+      }
+      const rollback = await performRollback(input.adapter, prepared, { at: executionAt, signal: input.signal });
+      if (rollback.status === "RESTORED") {
+        const outcome = createOutcome({
+          receipt: input.receipt,
+          execution: interruptedExecution,
+          verification,
+          rollback,
+          completed_at: executionAt
+        });
+        try {
+          return await sealedResult({
+            input,
+            consumption,
+            revalidation,
+            outcome,
+            status: "ROLLED_BACK",
+            at: executionAt,
+            errorCode: error.code ?? "CINT_EXECUTION_FAILED"
+          });
+        } catch (sealError) {
+          return failureResult({
+            receipt: input.receipt,
+            status: "FAIL_CLOSED",
+            code: sealError.code ?? "CINT_SEAL_FAILED",
+            at: executionAt,
+            consumption,
+            revalidation,
+            actionStarted
+          });
+        }
+      }
+    }
+    return failureResult({
+      receipt: input.receipt,
+      status: "FAIL_CLOSED",
+      code: error.code ?? "CINT_FAIL_CLOSED",
+      at: executionAt,
+      consumption,
+      revalidation,
+      actionStarted
+    });
+  }
+}

@@ -7,7 +7,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ignoredDirectories = new Set([".git", "node_modules"]);
 const ignoredPrefixes = ["artifacts/generated/"];
 const allowedDotfiles = new Set([".gitignore"]);
+const allowedHiddenDirectories = new Set([".github"]);
 const privateNames = ["S" + "I1", "Y" + "I1", "S" + "I6", "F" + "YRE"];
+const authorizedPublicNames = [new RegExp("\\b" + "SI1(?:[ -]CINT)" + "\\b", "gi")];
 const findings = [];
 const files = [];
 const excludedMetadata = [];
@@ -17,6 +19,7 @@ async function walk(directory) {
   for (const entry of entries) {
     const absolute = path.join(directory, entry.name);
     const relative = path.relative(root, absolute).split(path.sep).join("/");
+    if (entry.name === ".git") continue;
     if (ignoredPrefixes.some((prefix) => relative.startsWith(prefix))) continue;
     if (entry.name === ".DS_Store" || entry.name.startsWith("._")) {
       excludedMetadata.push(relative);
@@ -24,7 +27,9 @@ async function walk(directory) {
     }
     if (entry.isDirectory()) {
       if (ignoredDirectories.has(entry.name)) continue;
-      if (entry.name.startsWith(".")) findings.push({ code: "HIDDEN_DIRECTORY", path: relative });
+      if (entry.name.startsWith(".") && !allowedHiddenDirectories.has(relative)) {
+        findings.push({ code: "HIDDEN_DIRECTORY", path: relative });
+      }
       await walk(absolute);
       continue;
     }
@@ -74,8 +79,12 @@ for (const file of files) {
     for (const [code, expression] of contentRules) {
       if (expression.test(content)) findings.push({ code, path: file.relative });
     }
+    const privateNameSurface = authorizedPublicNames.reduce(
+      (value, expression) => value.replace(expression, "CINT"),
+      content
+    );
     for (const name of privateNames) {
-      if (new RegExp(`\\b${name}\\b`, "i").test(content)) {
+      if (new RegExp(`\\b${name}\\b`, "i").test(privateNameSurface)) {
         findings.push({ code: "PRIVATE_PROJECT_NAME", path: file.relative });
       }
     }
@@ -83,7 +92,7 @@ for (const file of files) {
 }
 
 const result = {
-  gate: "AF-PUBLICATION-AUDIT",
+  gate: "CINT-PUBLICATION-AUDIT",
   verdict: findings.length === 0 ? "PASS" : "FAIL",
   files_scanned: files.length,
   excluded_metadata_files: excludedMetadata.length,

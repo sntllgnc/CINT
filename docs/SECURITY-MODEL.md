@@ -1,53 +1,72 @@
-# Security model
+# CINT security model
 
-## Objective
+## Security properties
 
-Agent Floor reduces four risks in delegated Codex execution:
+CINT-R0 enforces these properties for its implemented local adapters:
 
-1. inherited context that is irrelevant, sensitive, or incorrectly attributed;
-2. authority expansion beyond explicitly granted files;
-3. unbounded fan-out, cycles, runtime, or output;
-4. admission of unsupported or semantically contradictory findings.
+- explicit intent precedes authority evaluation;
+- principal, authority, policy, adapter, target, action, context, and machine
+  state remain digest-bound through decision and receipt;
+- decisions cannot execute directly;
+- only the core receipt authority can authenticate executable authority;
+- every receipt expires, revalidates, and reaches one terminal store state;
+- replay, substitution, forgery, stale policy, revoked authority, drift, and
+  unavailable controls stop before action;
+- all 13 public authority-bearing schemas execute at record construction and
+  verification boundaries;
+- missing adapter or seal verification fails before receipt consumption;
+- outcome verification is distinct from execution;
+- divergent or interrupted synthetic effects are restored and hash-verified;
+- only verified or restored outcomes receive a core evidence seal;
+- adapters cannot mint or admit their own authority.
 
-## Trust boundaries
+## Enforcement boundaries
 
-| Boundary | Trusted | Untrusted until verified |
-|---|---|---|
-| Root task | Explicit task specification and local policy code | Ambient conversation history and undeclared files |
-| Child input | Canonical packet and allowlisted projection | User configuration, project rules, memories, plugins, apps, and parent transcript |
-| Child execution | Operating-system process controls and observed exit state | Model prose and recommendations |
-| Usage | Unique request-local usage records after a verified boundary | Raw cumulative counters and replayed events |
-| Evidence | Reopened file, exact line/excerpt, source hash, and parent semantic assertions | Citation strings supplied by the worker |
+| Boundary | Enforcing component |
+|---|---|
+| Strict JSON, runtime schemas, and record integrity | `src/cint/schema.js` and `src/cint/canonical.js` |
+| Exact action scope and time-bound authority | `src/cint/authority.js` |
+| Silent request and counter-intent challenge | `src/cint/challenge.js` |
+| Zero-authority decision | `src/cint/decision.js` |
+| Receipt authentication and lifetime | `src/cint/receipt.js` |
+| One-shot state and replay rejection | `src/cint/store.js` |
+| Current binding checks | `src/cint/revalidation.js` |
+| Fail-closed action boundary | `src/cint/execution.js` |
+| Verified/restored terminal outcome | `src/cint/outcome.js` and `src/cint/rollback.js` |
+| Hash-chained evidence and terminal authentication | `src/cint/evidence.js` and `src/cint/seal.js` |
 
-## Mechanical protections
+## Key custody
 
-- `fork_turns="all"` is rejected before execution.
-- A new ephemeral Codex process is created; no resume identifier is accepted.
-- User configuration and project rules are ignored for the child.
-- The child receives only allowlisted files in a temporary read-only projection.
-- The Codex process receives an explicit runtime environment allowlist instead of the complete parent environment.
-- Worker shells retain default filtering and add exclusions for common secret-bearing variable names.
-- Child multi-agent fan-out is disabled and depth is zero inside the worker.
-- Concurrency, cycles, runtime, and output are monitored by the parent process.
-- Original sources are re-hashed before admission.
-- Final output must satisfy a JSON schema and parent-owned semantic assertions.
+Receipt and seal authorities accept caller-supplied key material of at least 32
+bytes and retain it in private class fields. Keys do not enter canonical records,
+ledger payloads, adapter configuration digests, output artifacts, or errors.
+R0 does not persist or distribute keys; the embedding runtime owns generation,
+storage, rotation, and process isolation.
 
-## Local data handling
+## Adapter containment
 
-Agent Floor executes locally and uses the existing local Codex authentication surface. It does not read, copy, rewrite, export, or publish credential files. Raw native logs remain local and are excluded from the public package.
+The synthetic adapter is restricted to a caller-selected disposable root and a
+single existing relative regular file. It resolves the target inside that root,
+checks the expected pre-action digest, writes atomically, verifies the final
+digest, and can restore the exact original bytes.
 
-The published telemetry fixtures are synthetic and sanitized. They preserve only the numerical shape needed to test boundary accounting. The published native proof is a redacted summary containing aggregate usage, control state, evidence references, and hashes.
+The Codex adapter preserves the Agent Floor clean-context, allowlisted source
+projection, environment filtering, child fan-out prohibition, execution limits,
+request-local accounting, and evidence verification. It is classified read-only
+and has no CINT authority functions.
 
-## Threats not eliminated
+## Audit posture
 
-- A malicious or compromised local Codex executable can misreport events or ignore flags.
-- The operating system and repository owner remain trusted.
-- On platforms where the read-only sandbox permits other host-readable files, use a container, virtual machine, or dedicated account for hostile source content.
-- Environment exclusions reduce accidental secret propagation; they are not hostile-code containment or a network firewall.
-- Post-response token admission cannot stop provider-side work already completed.
-- Exact file-line verification cannot establish broader factual truth by itself; semantic assertions reduce but do not eliminate that risk.
-- Read-only AF-G0 does not govern a later write phase unless that phase receives a separate explicit policy and authority grant.
+The CINT test corpus contains positive and negative controls for silent requests,
+undeclared effects, target scope, missing rollback, record tampering, signature
+forgery, expiry, concurrent replay, crash locks, policy drift before and after
+consumption, target drift, unavailable services, divergence, interrupt,
+rollback restoration, evidence sealing, adapter authority separation, and
+legacy packet drift. It also executes the independent-review regressions for a
+missing adapter verifier, preparation-time policy and authority drift, invalid
+rehashed authority, all 13 schemas, and denied eager Adapter 01 loading.
 
-## Security verification
-
-The publication gate runs tests, deterministic demonstration, dependency audit, local secret/path/name scan, hidden-metadata inspection, and fresh-clone verification. See `SECURITY.md` for reporting vulnerabilities.
+The publication audit continues to reject local absolute paths, raw logs,
+credential formats, email addresses, session identifiers, hidden metadata, and
+private project names. The exact public product phrase `SI1 CINT` is the sole
+new identity exception.

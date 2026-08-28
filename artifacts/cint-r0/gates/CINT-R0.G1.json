@@ -1,0 +1,23 @@
+{
+  "gate": "CINT-R0.G1",
+  "status": "PASS",
+  "reviewers": [
+    {
+      "role": "preservation-and-lineage",
+      "mode": "clean-read-only",
+      "result": "COMPLETE"
+    },
+    {
+      "role": "control-gap-and-threat-boundary",
+      "mode": "clean-read-only",
+      "result": "COMPLETE"
+    }
+  ],
+  "root_reconciliation": {
+    "legacy_disposition": "CINT Adapter 01",
+    "source_modification": "root-only-sequential",
+    "confirmed_p0_gaps": 4,
+    "confirmed_p1_gaps": 2
+  },
+  "evidence": "docs/cint-r0/01_FOUNDATION_RECONCILIATION.md"
+}

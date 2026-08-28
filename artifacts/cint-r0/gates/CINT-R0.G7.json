@@ -1,0 +1,19 @@
+{
+  "gate": "CINT-R0.G7",
+  "status": "PASS",
+  "cint_cli_tests": {
+    "passed": 2,
+    "failed": 0
+  },
+  "prior_tests": {
+    "passed": 51,
+    "failed": 0
+  },
+  "active_product": "SI1 CINT",
+  "legacy_product": "CINT Adapter 01",
+  "historical_material": "docs/archive",
+  "package": "si1-cint@0.1.0-cint-r0",
+  "publication_authority": "NONE",
+  "remote_mutations": 0,
+  "evidence": "docs/cint-r0/07_DOCUMENTATION_REASSEMBLY.md"
+}

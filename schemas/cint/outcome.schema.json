@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cint.invalid/schema/outcome-1.json",
+  "title": "CINT verified outcome",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "status",
+    "effect_status",
+    "receipt_id",
+    "receipt_digest",
+    "action_digest",
+    "target_digest",
+    "execution_digest",
+    "verification_digest",
+    "rollback_digest",
+    "final_state_digest",
+    "completed_at",
+    "digest"
+  ],
+  "properties": {
+    "protocol": { "const": "cint/outcome/1" },
+    "status": { "enum": ["VERIFIED", "ROLLED_BACK"] },
+    "effect_status": { "enum": ["APPLIED", "RESTORED"] },
+    "receipt_id": { "$ref": "#/$defs/id" },
+    "receipt_digest": { "$ref": "#/$defs/sha256" },
+    "action_digest": { "$ref": "#/$defs/sha256" },
+    "target_digest": { "$ref": "#/$defs/sha256" },
+    "execution_digest": { "$ref": "#/$defs/sha256" },
+    "verification_digest": { "$ref": "#/$defs/sha256" },
+    "rollback_digest": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+    "final_state_digest": { "$ref": "#/$defs/sha256" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}
