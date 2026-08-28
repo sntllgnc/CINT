@@ -16,9 +16,13 @@ export const CINT_IDENTITY = Object.freeze({
     "cint.adapter.synthetic-file-patch",
     "cint.adapter.codex-delegation"
   ])
-});
+} as const);
 
-export function renderCintHelp() {
+export interface CintCliOptions {
+  readonly write?: (value: string) => void;
+}
+
+export function renderCintHelp(): string {
   return [
     "SI1 CINT — Machine Counterintelligence Runtime",
     "",
@@ -31,7 +35,10 @@ export function renderCintHelp() {
   ].join("\n");
 }
 
-export async function main(argv = process.argv.slice(2), options = {}) {
+export async function main(
+  argv: readonly string[] = process.argv.slice(2),
+  options: CintCliOptions = {}
+): Promise<number> {
   const write = options.write ?? ((value) => process.stdout.write(value));
   const [command = "help", ...rest] = argv;
   if (command === "help" || command === "--help" || command === "-h") {

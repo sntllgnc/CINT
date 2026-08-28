@@ -38,11 +38,14 @@ run([
 await copyMatching(path.join(root, "src"), path.join(root, "dist", "src"), (name) => name.endsWith(".js"));
 await copyMatching(path.join(root, "bin"), path.join(root, "dist", "bin"), (name) => name.endsWith(".js"));
 await copyMatching(path.join(root, "schemas"), path.join(root, "dist", "schemas"), (name) => name.endsWith(".json"));
+await copyMatching(path.join(root, "fixtures"), path.join(root, "dist", "fixtures"), () => true);
+await copyMatching(path.join(root, "examples"), path.join(root, "dist", "examples"), () => true);
 
 console.log(JSON.stringify({
   gate: "CINT-R1-BUILD",
   verdict: "PASS",
   output: "dist",
   staged_javascript_copy: true,
-  schema_copy: true
+  schema_copy: true,
+  legacy_demo_assets_copy: true
 }, null, 2));

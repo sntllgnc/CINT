@@ -72,7 +72,7 @@ if (pack.status !== 0) {
     const packageResult = JSON.parse(pack.stdout);
     packagedSchemas = (packageResult[0]?.files ?? [])
       .map(({ path: packagedPath }) => packagedPath)
-      .filter((packagedPath) => packagedPath.startsWith("schemas/cint/") && packagedPath.endsWith(".schema.json"))
+      .filter((packagedPath) => packagedPath.startsWith("dist/schemas/cint/") && packagedPath.endsWith(".schema.json"))
       .map((packagedPath) => path.posix.basename(packagedPath))
       .sort();
   } catch {

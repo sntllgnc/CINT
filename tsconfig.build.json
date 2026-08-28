@@ -5,6 +5,7 @@
     "outDir": "./dist"
   },
   "include": [
-    "src/cint/**/*.ts"
+    "src/cint/**/*.ts",
+    "bin/cint.ts"
   ]
 }
