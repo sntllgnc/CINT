@@ -4,6 +4,8 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { readNpmPackReport, spawnNpmPack } from "./npm-pack-launch.mjs";
+
 const root = fileURLToPath(new URL("../", import.meta.url));
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 assert.equal(packageJson.private, true, "package must remain private");
@@ -14,14 +16,8 @@ const build = spawnSync(process.execPath, [fileURLToPath(new URL("./build.mjs", 
 });
 assert.equal(build.status, 0, "package verification build failed");
 
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-const packed = spawnSync(npm, ["pack", "--dry-run", "--json", "--ignore-scripts"], {
-  cwd: root,
-  encoding: "utf8"
-});
-assert.equal(packed.status, 0, packed.stderr || "npm pack dry run failed");
-const report = JSON.parse(packed.stdout);
-assert.ok(Array.isArray(report) && report.length === 1, "unexpected npm pack report");
+const { invocation: npmPackInvocation, result: packed } = spawnNpmPack({ cwd: root });
+const report = readNpmPackReport(packed);
 const files = new Set(report[0].files.map((entry) => entry.path));
 
 function targets(value) {
@@ -86,6 +82,7 @@ console.log(JSON.stringify({
   gate: "CINT-R1-PACKAGE-EXPORTS",
   verdict: "PASS",
   private: true,
+  npm_launch_mode: npmPackInvocation.mode,
   file_count: files.size,
   declared_targets: declaredTargets.sort(),
   runtime_exports_resolved: 4,

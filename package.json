@@ -47,7 +47,7 @@
     "clean": "node ./scripts/clean.mjs",
     "demo": "node ./bin/agent-floor.js demo",
     "doctor": "node ./bin/agent-floor.js doctor",
-    "pack:verify": "node ./scripts/verify-package.mjs",
+    "pack:verify": "node --test ./tests/npm-pack-launch.test.mjs && node ./scripts/verify-package.mjs",
     "scan:escapes": "node ./scripts/scan-typescript-escape-hatches.mjs",
     "scan:boundaries": "node ./scripts/verify-cint-import-boundaries.mjs",
     "test": "node ./scripts/test.mjs all",
