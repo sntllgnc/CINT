@@ -31,3 +31,25 @@ The policy follows the official [Node.js release table](https://nodejs.org/en/ab
 Historical release notes, frozen evidence, and archived Agent Floor material
 retain their original runtime statements as immutable history rather than
 active support claims.
+
+## Portable npm process contract
+
+Package verification must not depend on direct `.cmd` execution behavior.
+When npm exposes `npm_execpath`, CINT launches that CLI with the active Node
+executable on every platform. If the metadata is absent, Windows uses a fixed
+command-processor invocation and POSIX uses direct `npm`; both fallbacks keep
+the package arguments fixed and avoid caller-derived command text.
+
+The verifier distinguishes four states:
+
+| Process result | Verification state |
+|---|---|
+| Spawn error | Fail before status or JSON handling |
+| `status: null` | Fail as an indeterminate process result |
+| Non-zero status | Fail with npm stderr or the bounded fallback message |
+| Zero status and valid one-item JSON report | Continue package-content verification |
+
+Workflow [33175315187](https://github.com/sntllgnc/CINT/actions/runs/33175315187)
+proved this contract across all nine Linux, macOS, and Windows lanes on Node.js
+22, 24, and 26. Both stable aggregate checks passed at candidate head
+`97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022`.

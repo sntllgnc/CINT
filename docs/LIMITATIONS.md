@@ -38,6 +38,10 @@
   compatibility lane, Node.js 26 is a forward-compatibility lane, and Node.js
   20 is historical only. Support for a major still requires its latest
   security-patched release.
+- The cross-platform `npm pack --dry-run` proof establishes launch portability,
+  expected package inventory, export/declaration resolution, and source-map
+  hygiene. It is not an npm publication, clean-install guarantee, deployment
+  proof, signature-transparency proof, or production-readiness claim.
 - R1 contains no Rust, WASM, Three.js, browser, WebGL, web-server, or UI trusted
   runtime. An isolated Rust core and any visualization surface require separate
   future authority; neither is implied by this migration.

@@ -26,6 +26,10 @@ An isolated Rust trusted core is deferred to a later decision and must be
 justified by a bounded security or correctness requirement. R1 neither begins
 nor implies a Rust rewrite.
 
+The C2 package-launch correction is process portability inside the existing
+Node.js verification plane. It introduces no framework, UI, browser, Rust,
+WASM, or deployment surface and changes no CINT runtime-authority path.
+
 ## Non-claims
 
 The R1 candidate does not establish production readiness, machine-wide

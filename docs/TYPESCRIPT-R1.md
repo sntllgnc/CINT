@@ -16,6 +16,12 @@ typescript   7.0.2
 
 Neither package is a runtime dependency.
 
+The verified C2 implementation candidate is `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022`
+on `cint-r1-typescript`. It preserves the C1 parent
+`42465b0192d167f419e782674fd4675c4049e4d9` and has the terminal state
+`READY-FOR-CINT-R1-TYPESCRIPT-REVIEW`. PR #2 remains open and draft; this is a
+reviewable branch state, not a merge or release state.
+
 ## Compiler policy
 
 `tsconfig.base.json` sets ES2022 with NodeNext modules and enables every R1
@@ -30,6 +36,12 @@ The escape-hatch gate rejects production `any`, `as any`, `@ts-ignore`,
 `@ts-nocheck`, unchecked double assertions, and non-null assertions. Deliberate
 `@ts-expect-error` cases exist only under `tests/types/` to prove invalid
 authority substitutions fail compilation.
+
+All six `cint-*.test.ts` suites are included in strict typechecking, compiled
+into ignored `.test-dist/` JavaScript, and executed by both `test:cint` and the
+complete test path. The candidate contains 29 TypeScript and zero JavaScript
+production files under `src/cint/`, and six TypeScript and zero JavaScript CINT
+test suites.
 
 ## Mechanical distinctions
 
@@ -83,3 +95,21 @@ evidence and receives no decision, receipt, consumption, or seal authority.
 Package exports resolve compiled JavaScript and declarations for the core,
 CLI, synthetic adapter, and Codex delegation adapter. `agent-floor` remains the
 historical compatibility CLI.
+
+## Package-launch portability correction
+
+C2 does not change TypeScript types, emitted runtime semantics, protocols,
+schemas, exports, or package identity. It changes how the verification process
+starts npm:
+
+```text
+npm_execpath present    -> process.execPath + npm CLI path, shell false
+metadata absent / win   -> fixed cmd.exe invocation, shell false
+metadata absent / POSIX -> direct npm invocation, shell false
+spawn error or null status -> verification failure before JSON parsing
+status 0 + valid report -> continue existing package assertions
+```
+
+Six deterministic launch regressions cover those branches. The existing 72
+runtime tests, 13 schemas, 18 behavioral-equivalence cases, and 53 historical
+evidence entries remain unchanged.

@@ -40,6 +40,24 @@ and seal controls.
 The package remains private and versioned `0.1.0-cint-r0`. R1 grants no merge,
 tag, release, npm-publication, or production-deployment authority.
 
+The current R1 review state is:
+
+| Field | Verified value |
+|---|---|
+| Branch | `cint-r1-typescript` |
+| Verified C2 implementation head | `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022` |
+| Required parent | `42465b0192d167f419e782674fd4675c4049e4d9` |
+| Pull request | [#2](https://github.com/sntllgnc/CINT/pull/2), open and draft |
+| Qualifying workflow | [33175315187](https://github.com/sntllgnc/CINT/actions/runs/33175315187), nine lanes plus both aggregates passed |
+| Terminal | `READY-FOR-CINT-R1-TYPESCRIPT-REVIEW` |
+
+The C2 correction changes only package-verification process launch. It prefers
+the active Node executable plus npm's CLI path, uses bounded platform fallbacks
+when that metadata is absent, and treats spawn errors or a missing exit status
+as terminal verification failures. This is build assurance, not CINT execution
+authority: it cannot decide, issue or consume a receipt, invoke an action
+adapter, or seal an outcome.
+
 ## R0 state
 
 `CINT-R0` is the public source and verification baseline for the SI1 CINT
@@ -115,7 +133,8 @@ src/cint/**/*.ts                  strict TypeScript CINT control plane
 src/cint/adapters/                explicit, separately imported typed action adapters
 src/adapters/codex-delegation/    preserved Agent Floor compatibility kernel
 schemas/cint/                     strict authority-bearing JSON schemas
-tests/cint-*.test.js              CINT conformance and end-to-end proofs
+tests/cint-*.test.ts              six strictly typed CINT conformance suites
+tests/npm-pack-launch.test.mjs    deterministic cross-platform package-launch proof
 tests/types/                      compile-time positive and negative contracts
 dist/                             ignored generated JavaScript and declarations
 docs/cint-r0/                     gate evidence and public R0 release notes
@@ -134,6 +153,7 @@ artifacts/cint-r1/                R1 baseline and behavioral-equivalence records
 - [Limitations](docs/LIMITATIONS.md)
 - [Runtime support](docs/RUNTIME-SUPPORT.md)
 - [TypeScript R1 boundary](docs/TYPESCRIPT-R1.md)
+- [R1 C2 state, logic, and architecture](docs/cint-r1/10_CORRECTION_C2.md)
 - [Framework boundary](docs/FRAMEWORK-BOUNDARY.md)
 - [Codex Adapter 01](docs/CODEX-ADAPTER.md)
 - [CINT-R0 gate ledger](artifacts/cint-r0/gate-ledger.json)

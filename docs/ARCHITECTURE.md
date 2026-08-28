@@ -21,6 +21,19 @@ runtime controls: exact keys, one of the 13 unchanged JSON Schemas, canonical
 JSON, content digests, protocol checks, and the applicable HMAC and gate
 verification. Runtime schemas remain authoritative.
 
+## Two assurance planes
+
+CINT keeps runtime authority and build assurance mechanically separate:
+
+| Plane | Establishes | Does not establish |
+|---|---|---|
+| Runtime authority | Current decision bindings, signed receipt eligibility, one-shot consumption, execution admission, verified outcome, rollback, and evidence seal | Package portability, publication, deployment, or host-wide enforcement |
+| Build assurance | Strict compilation, test execution, schema packaging, package inventory, export and declaration resolution, source-map hygiene, and supported-platform verification | A decision, receipt, consumed authority, adapter invocation, or seal |
+
+The package verifier can fail a candidate build. It cannot authorize a CINT
+action. Conversely, a valid CINT receipt cannot bypass package, CI, or release
+policy.
+
 ## Control planes
 
 | Plane | Responsibility | Cannot do |
@@ -79,6 +92,28 @@ rollback function, ledger, or seal issuer/verifier is unavailable. If failure
 occurs after a synthetic action begins, the gate invokes rollback and verifies
 the restored hash before sealing the restored outcome.
 
+## Package-verification boundary
+
+Package verification runs the immutable argument vector
+`npm pack --dry-run --json --ignore-scripts`. Launch selection is ordered and
+fail closed:
+
+1. When `npm_execpath` exists, the verifier invokes it through
+   `process.execPath` without a shell.
+2. On Windows without npm CLI metadata, it invokes the fixed command through
+   `ComSpec` or `cmd.exe` with `/d /s /c`; no untrusted value enters the command
+   text.
+3. On POSIX without npm CLI metadata, it invokes `npm` directly without a
+   shell.
+4. A spawn error, `status: null`, non-zero status, malformed JSON, unexpected
+   report cardinality, or missing file inventory terminates verification.
+5. Only a successful report proceeds to package-target, runtime-export,
+   declaration-export, source-map, and private-package assertions.
+
+This boundary is implemented in `scripts/npm-pack-launch.mjs` and consumed by
+`scripts/verify-package.mjs`. Its deterministic regression is independent of
+the six compiled CINT test suites.
+
 ## Adapter boundary
 
 Adapters implement preparation, execution, outcome verification, and optional
@@ -115,3 +150,12 @@ under `src/adapters/codex-delegation/`. Root module re-exports and the
 `agent-floor` CLI retain the frozen API and AF-G0 regression semantics. The
 historical tag and evidence manifest remain the source of immutable release
 identity.
+
+## Current R1 review boundary
+
+The reviewed candidate head is `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022`.
+Workflow `33175315187` passed Linux, macOS, and Windows on Node.js 22, 24,
+and 26, plus both aggregate checks. The branch is ready for TypeScript review;
+PR #2 remains draft, `main` remains the R0 baseline, and no merge, release,
+package publication, framework migration, or deployment follows from this
+state.

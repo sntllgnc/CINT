@@ -32,7 +32,7 @@
 
 Every protected `main` update must pass `CINT-R0 remote verification`. The aggregate
 gate covers the complete verification command and the 13-schema package check
-on Linux, macOS, and Windows across Node.js 20, 24, and 26.
+on Linux, macOS, and Windows across Node.js 22, 24, and 26.
 
 ## Release boundary
 
@@ -44,3 +44,12 @@ release remain unchanged.
 
 The complete technical limitations and non-claims are maintained in
 [`docs/LIMITATIONS.md`](LIMITATIONS.md).
+
+## R1 successor candidate
+
+The R1 TypeScript candidate is not part of the R0 release. Its verified C2
+implementation head is `97dac5e80609ba6522f15bb5ecc0a4c0aa5ef022`, and workflow
+[33175315187](https://github.com/sntllgnc/CINT/actions/runs/33175315187)
+passed all nine platform/runtime lanes and both aggregate checks. PR #2 remains
+open and draft. This establishes `READY-FOR-CINT-R1-TYPESCRIPT-REVIEW`; it does
+not alter `main`, either release tag, the prerelease, npm, or deployment state.
